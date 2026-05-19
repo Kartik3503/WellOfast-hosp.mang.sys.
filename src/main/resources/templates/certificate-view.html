@@ -1,0 +1,36 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org" lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Certificate — WellOfast</title><link rel="stylesheet" th:href="@{/css/style.css}"></head><body>
+<div class="app"><button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+<div th:replace="~{fragments/sidebar :: sidebar(${user}, 'certificates')}"></div>
+<main class="main fade-in">
+  <div class="topbar"><div><h1>📜 Birth Certificate</h1><div class="sub" th:text="'Certificate No: ' + ${certificate.certificateNumber}">BC-001</div></div>
+    <div style="display:flex;gap:.5rem"><a th:href="@{/certificates/download/{id}(id=${certificate.id})}" class="btn btn-primary">📥 Download PDF</a><a th:href="@{/certificates}" class="btn btn-outline">← Back</a></div></div>
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div class="detail-card">
+    <div class="detail-header"><h1>BIRTH CERTIFICATE</h1><div class="sub" th:text="${certificate.certificateNumber}">BC-001</div></div>
+    <div class="detail-body">
+      <div class="detail-section"><div class="detail-section-title">🏥 Issuing Authority</div><div class="detail-grid">
+        <div class="detail-item"><span class="dlabel">Hospital</span><span class="dvalue" th:text="${certificate.hospitalName}">-</span></div>
+        <div class="detail-item"><span class="dlabel">Reg No.</span><span class="dvalue" th:text="${certificate.hospitalRegistrationNumber}">-</span></div>
+        <div class="detail-item"><span class="dlabel">Sanctioned By</span><span class="dvalue" th:text="${certificate.sanctionedByName}">-</span></div>
+        <div class="detail-item"><span class="dlabel">Designation</span><span class="dvalue" th:text="${certificate.sanctionedByDesignation}">-</span></div>
+      </div></div>
+      <div class="detail-section"><div class="detail-section-title">👶 Child Details</div><div class="detail-grid">
+        <div class="detail-item"><span class="dlabel">Name</span><span class="dvalue" th:text="${certificate.childName}">-</span></div>
+        <div class="detail-item"><span class="dlabel">Gender</span><span class="dvalue" th:text="${certificate.gender}">-</span></div>
+        <div class="detail-item"><span class="dlabel">Date of Birth</span><span class="dvalue" th:text="${certificate.dateOfBirth}">-</span></div>
+        <div class="detail-item"><span class="dlabel">Time of Birth</span><span class="dvalue" th:text="${certificate.timeOfBirth}">-</span></div>
+        <div class="detail-item"><span class="dlabel">Place</span><span class="dvalue" th:text="${certificate.placeOfBirth}">-</span></div>
+        <div class="detail-item"><span class="dlabel">Weight</span><span class="dvalue" th:text="${certificate.birthWeight ?: 'N/A'}">-</span></div>
+      </div></div>
+      <div class="detail-section"><div class="detail-section-title">👩 Mother</div><div class="detail-grid">
+        <div class="detail-item"><span class="dlabel">Name</span><span class="dvalue" th:text="${certificate.motherName}">-</span></div>
+        <div class="detail-item"><span class="dlabel">Occupation</span><span class="dvalue" th:text="${certificate.motherOccupation ?: 'N/A'}">-</span></div>
+      </div></div>
+      <div class="detail-section"><div class="detail-section-title">👨 Father</div><div class="detail-grid">
+        <div class="detail-item"><span class="dlabel">Name</span><span class="dvalue" th:text="${certificate.fatherName}">-</span></div>
+        <div class="detail-item"><span class="dlabel">Occupation</span><span class="dvalue" th:text="${certificate.fatherOccupation ?: 'N/A'}">-</span></div>
+      </div></div>
+    </div>
+    <div class="detail-actions"><a th:href="@{/certificates/download/{id}(id=${certificate.id})}" class="btn btn-primary">📥 Download PDF</a><a th:href="@{/certificates/new}" class="btn btn-outline">+ New Certificate</a></div>
+  </div>
+</main></div></body></html>

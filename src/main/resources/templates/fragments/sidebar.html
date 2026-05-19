@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!-- Sidebar Fragment -->
+<aside th:fragment="sidebar(user, active)" class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+        <div class="brand-icon">W</div>
+        <div><h2>WellOfast</h2><span>Hospital Management</span></div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">Main</div>
+        <a th:href="@{/dashboard}" th:classappend="${active=='dashboard'?'active':''}" class="nav-item"><span class="icon">📊</span> Dashboard</a>
+
+        <div class="nav-label">Management</div>
+        <a th:if="${user.role=='ADMIN'}" th:href="@{/staff}" th:classappend="${active=='staff'?'active':''}" class="nav-item"><span class="icon">👥</span> Staff</a>
+        <a th:if="${user.role=='ADMIN' or user.role=='DOCTOR'}" th:href="@{/patients}" th:classappend="${active=='patients'?'active':''}" class="nav-item"><span class="icon">🏥</span> Patients</a>
+        <a th:if="${user.role=='ADMIN' or user.role=='DOCTOR'}" th:href="@{/appointments}" th:classappend="${active=='appointments'?'active':''}" class="nav-item"><span class="icon">📅</span> Appointments</a>
+        <a th:if="${user.role=='ADMIN'}" th:href="@{/departments}" th:classappend="${active=='departments'?'active':''}" class="nav-item"><span class="icon">🏢</span> Departments</a>
+
+        <div class="nav-label">Services</div>
+        <a th:if="${user.role=='ADMIN' or user.role=='DOCTOR'}" th:href="@{/certificates}" th:classappend="${active=='certificates'?'active':''}" class="nav-item"><span class="icon">📜</span> Birth Certificates</a>
+        <a th:href="@{/leaves}" th:classappend="${active=='leaves'?'active':''}" class="nav-item"><span class="icon">🌴</span> Leave Management</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="sidebar-user">
+            <div class="avatar" th:text="${user.fullName != null ? user.fullName.substring(0,1) : 'U'}">U</div>
+            <div class="user-info">
+                <strong th:text="${user.fullName}">User</strong>
+                <span th:text="${user.role + ' • ' + (user.department != null ? user.department : '')}">Role</span>
+            </div>
+        </div>
+        <form th:action="@{/logout}" method="post" style="margin:0;">
+            <button type="submit" class="btn btn-outline btn-full btn-sm">🚪 Logout</button>
+        </form>
+    </div>
+</aside>
+</html>

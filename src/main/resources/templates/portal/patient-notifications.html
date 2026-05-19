@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Notifications — WellOfast Patient Portal</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div class="app">
+  <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <div th:replace="~{fragments/patient-sidebar :: sidebar(${user}, 'notifications')}"></div>
+  <main class="main fade-in">
+    <div class="topbar">
+      <div><h1>🔔 Notifications</h1>
+      <div class="sub">Stay updated on your health</div></div>
+      <button class="btn btn-outline" onclick="markAllRead()">✅ Mark All Read</button>
+    </div>
+
+    <div th:if="${notifications.isEmpty()}" class="empty" style="padding:4rem 2rem">
+      <div class="empty-icon">🔔</div><h3>No notifications yet</h3><p>You'll receive updates about appointments, prescriptions, and lab results here</p>
+    </div>
+
+    <div th:if="${!notifications.isEmpty()}" class="notif-list">
+      <div th:each="n : ${notifications}" class="notif-item" th:classappend="${n.read ? '' : 'unread'}" th:data-id="${n.id}">
+        <div class="notif-icon-wrap" th:classappend="${n.type}">
+          <span th:text="${n.icon != null ? n.icon : '🔔'}">🔔</span>
+        </div>
+        <div class="notif-content">
+          <div class="notif-title" th:text="${n.title}">Title</div>
+          <div class="notif-message" th:text="${n.message}">Message</div>
+          <div class="notif-time" th:text="${#temporals.format(n.createdAt, 'dd MMM yyyy, HH:mm')}">Date</div>
+        </div>
+        <div class="notif-actions">
+          <a th:if="${n.link != null}" th:href="${n.link}" class="btn btn-outline btn-sm" onclick="markRead(this)">View</a>
+          <span th:if="${!n.read}" class="notif-dot"></span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+function markRead(el){
+    const item = el.closest('.notif-item');
+    const id = item.dataset.id;
+    fetch('/api/notifications/'+id+'/read',{method:'POST'});
+    item.classList.remove('unread');
+}
+function markAllRead(){
+    fetch('/api/notifications/read-all',{method:'POST'}).then(()=>{
+        document.querySelectorAll('.notif-item.unread').forEach(el=>el.classList.remove('unread'));
+        document.querySelectorAll('.notif-dot').forEach(el=>el.remove());
+    });
+}
+</script>
+</body></html>

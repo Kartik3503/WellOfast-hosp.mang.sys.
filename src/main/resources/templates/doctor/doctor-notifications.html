@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Notifications — WellOfast Doctor</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div class="app">
+  <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <aside class="sidebar doctor-sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="brand-icon doctor-icon">W</div><div><h2>WellOfast</h2><span>Doctor Portal</span></div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Dashboard</div>
+      <a href="/doctor/dashboard" class="nav-item"><span class="icon">📊</span> My Dashboard</a>
+      <a href="/appointments" class="nav-item"><span class="icon">📅</span> Appointments</a>
+      <a href="/patients" class="nav-item"><span class="icon">🏥</span> Patients</a>
+      <div class="nav-label">Communication</div>
+      <a href="/doctor/chat" class="nav-item"><span class="icon">💬</span> Messages
+        <span th:if="${unreadChats > 0}" class="nav-badge" th:text="${unreadChats}">0</span></a>
+      <a href="/doctor/notifications" class="nav-item active"><span class="icon">🔔</span> Notifications
+        <span th:if="${unreadNotifs > 0}" class="nav-badge" th:text="${unreadNotifs}">0</span></a>
+      <div class="nav-label">Services</div>
+      <a href="/certificates" class="nav-item"><span class="icon">📜</span> Birth Certificates</a>
+      <a href="/leaves" class="nav-item"><span class="icon">🌴</span> Leave Management</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar doctor-avatar-sm" th:text="${user.fullName.substring(0,1)}">D</div>
+        <div class="user-info"><strong th:text="${user.fullName}">Doctor</strong><span th:text="${user.department}">Dept</span></div>
+      </div>
+      <form th:action="@{/logout}" method="post" style="margin:0;"><button type="submit" class="btn btn-outline btn-full btn-sm">🚪 Logout</button></form>
+    </div>
+  </aside>
+
+  <main class="main fade-in">
+    <div class="topbar">
+      <div><h1>🔔 Notifications</h1><div class="sub">Stay updated on your schedule</div></div>
+      <button class="btn btn-outline" onclick="markAllRead()">✅ Mark All Read</button>
+    </div>
+    <div th:if="${notifications.isEmpty()}" class="empty" style="padding:4rem"><div class="empty-icon">🔔</div><h3>No notifications</h3></div>
+    <div th:if="${!notifications.isEmpty()}" class="notif-list">
+      <div th:each="n : ${notifications}" class="notif-item" th:classappend="${n.read ? '' : 'unread'}" th:data-id="${n.id}">
+        <div class="notif-icon-wrap" th:classappend="${n.type}"><span th:text="${n.icon != null ? n.icon : '🔔'}">🔔</span></div>
+        <div class="notif-content">
+          <div class="notif-title" th:text="${n.title}">Title</div>
+          <div class="notif-message" th:text="${n.message}">Message</div>
+          <div class="notif-time" th:text="${#temporals.format(n.createdAt, 'dd MMM yyyy, HH:mm')}">Date</div>
+        </div>
+        <div class="notif-actions">
+          <a th:if="${n.link != null}" th:href="${n.link}" class="btn btn-outline btn-sm" onclick="markRead(this)">View</a>
+          <span th:if="${!n.read}" class="notif-dot"></span>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+function markRead(el){const item=el.closest('.notif-item');fetch('/api/notifications/'+item.dataset.id+'/read',{method:'POST'});item.classList.remove('unread')}
+function markAllRead(){fetch('/api/notifications/read-all',{method:'POST'}).then(()=>{document.querySelectorAll('.notif-item.unread').forEach(el=>el.classList.remove('unread'));document.querySelectorAll('.notif-dot').forEach(el=>el.remove())})}
+</script>
+</body></html>

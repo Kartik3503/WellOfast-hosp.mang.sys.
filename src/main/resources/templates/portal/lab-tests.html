@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Lab Tests — WellOfast Patient Portal</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div class="app">
+  <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <div th:replace="~{fragments/patient-sidebar :: sidebar(${user}, 'lab-tests')}"></div>
+  <main class="main fade-in">
+    <div class="topbar">
+      <div><h1>🩸 Lab Tests</h1><div class="sub">Browse and book diagnostic tests</div></div>
+      <a th:href="@{/portal/lab-tests/my-bookings}" class="btn btn-outline">📋 My Bookings</a>
+    </div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <!-- Category Filter -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-body" style="display:flex;gap:.5rem;flex-wrap:wrap;align-items:center">
+        <a th:href="@{/portal/lab-tests}" class="btn btn-sm" th:classappend="${selectedCategory == null ? 'btn-primary' : 'btn-outline'}">All</a>
+        <a th:each="cat : ${categories}" th:href="@{/portal/lab-tests(category=${cat})}"
+           class="btn btn-sm" th:classappend="${selectedCategory == cat ? 'btn-primary' : 'btn-outline'}"
+           th:text="${cat}">BLOOD</a>
+      </div>
+    </div>
+
+    <div th:if="${tests.isEmpty()}" class="empty" style="padding:4rem 2rem">
+      <div class="empty-icon">🩸</div>
+      <h3>No tests available</h3>
+      <p>Try selecting a different category</p>
+    </div>
+
+    <div class="lab-test-grid">
+      <div th:each="t : ${tests}" class="lab-test-card">
+        <div class="lab-test-header">
+          <div class="lab-test-icon"
+               th:classappend="${t.category == 'BLOOD' ? 'blood' : t.category == 'URINE' ? 'urine' : t.category == 'CARDIAC' ? 'cardiac' : t.category == 'IMAGING' ? 'imaging' : 'other'}">
+            <span th:text="${t.category == 'BLOOD' ? '🩸' : t.category == 'URINE' ? '🧪' : t.category == 'CARDIAC' ? '❤️' : t.category == 'IMAGING' ? '📷' : t.category == 'THYROID' ? '🦋' : '🔬'}">🩸</span>
+          </div>
+          <div class="lab-test-info">
+            <h3 th:text="${t.name}">Test Name</h3>
+            <span class="badge badge-blue" th:text="${t.category}">BLOOD</span>
+          </div>
+          <div class="lab-test-price">
+            <span class="price-val">₹<span th:text="${t.price}">500</span></span>
+          </div>
+        </div>
+        <div class="lab-test-body">
+          <p th:if="${t.description != null}" th:text="${t.description}" class="lab-desc">Description</p>
+          <div class="lab-meta-row">
+            <span th:if="${t.sampleType != null}">🧫 <strong th:text="${t.sampleType}">Blood</strong></span>
+            <span th:if="${t.turnaroundTime != null}">⏱️ <strong th:text="${t.turnaroundTime}">24 hrs</strong></span>
+            <span th:if="${t.fasting}" class="badge badge-yellow">Fasting Required</span>
+          </div>
+        </div>
+        <div class="lab-test-footer">
+          <form th:action="@{/portal/lab-tests/book}" method="post" style="display:flex;gap:.5rem;width:100%;align-items:flex-end">
+            <input type="hidden" name="testId" th:value="${t.id}">
+            <div class="form-group" style="flex:1;margin-bottom:0">
+              <label style="font-size:.7rem">Schedule Date</label>
+              <input type="date" name="scheduledDate" class="form-control" required
+                     th:min="${#temporals.format(T(java.time.LocalDate).now(), 'yyyy-MM-dd')}">
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">📅 Book Test</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body></html>

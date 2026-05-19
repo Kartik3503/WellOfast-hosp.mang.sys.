@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>My Appointments — WellOfast Patient Portal</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div class="app">
+  <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <div th:replace="~{fragments/patient-sidebar :: sidebar(${user}, 'appointments')}"></div>
+  <main class="main fade-in">
+    <div class="topbar">
+      <div><h1>📅 My Appointments</h1>
+      <div class="sub">Manage your scheduled visits</div></div>
+      <a th:href="@{/portal/doctors}" class="btn btn-primary">+ Book New</a>
+    </div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <!-- Upcoming -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-header"><h2>🔔 Upcoming Appointments</h2>
+        <span class="badge badge-green" th:text="${upcoming.size() + ' scheduled'}">0 scheduled</span></div>
+      <div th:if="${upcoming.isEmpty()}" class="empty">
+        <div class="empty-icon">📅</div>
+        <h3>No upcoming appointments</h3>
+        <p>Browse doctors and book your next visit</p>
+        <a th:href="@{/portal/doctors}" class="btn btn-primary btn-sm" style="margin-top:.5rem">Find Doctors</a>
+      </div>
+      <div th:if="${!upcoming.isEmpty()}" class="card-body" style="padding:0">
+        <div th:each="a : ${upcoming}" class="portal-appt-item appt-item-full">
+          <div class="appt-date-badge">
+            <div class="appt-day" th:text="${#temporals.format(a.date, 'dd')}">15</div>
+            <div class="appt-month" th:text="${#temporals.format(a.date, 'MMM')}">Jun</div>
+          </div>
+          <div class="appt-info" style="flex:1">
+            <strong th:text="${a.doctorName}">Dr. Smith</strong>
+            <span th:text="${a.department}">Cardiology</span>
+            <span class="appt-time">🕐 <span th:text="${a.time}">10:00</span> · <span th:text="${a.type}">Checkup</span></span>
+          </div>
+          <div class="appt-meta">
+            <span class="badge badge-green">Scheduled</span>
+            <span th:if="${a.fee > 0}" class="appt-fee">₹<span th:text="${a.fee}">500</span></span>
+          </div>
+          <div class="appt-actions">
+            <a th:href="@{/portal/video-call/{id}(id=${a.id})}" class="btn btn-outline btn-sm">📹 Video Call</a>
+            <a th:href="@{/portal/appointments/cancel/{id}(id=${a.id})}" class="btn btn-danger btn-sm"
+               onclick="return confirm('Cancel this appointment?')">Cancel</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Past -->
+    <div class="card">
+      <div class="card-header"><h2>📜 Past Appointments</h2></div>
+      <div th:if="${past.isEmpty()}" class="empty">
+        <div class="empty-icon">📜</div>
+        <h3>No past appointments</h3>
+      </div>
+      <table th:if="${!past.isEmpty()}" class="data-table">
+        <thead><tr><th>Date</th><th>Time</th><th>Doctor</th><th>Department</th><th>Type</th><th>Fee</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr th:each="a : ${past}">
+            <td th:text="${#temporals.format(a.date, 'dd MMM yyyy')}">15 Jun</td>
+            <td th:text="${a.time}">10:00</td>
+            <td class="name" th:text="${a.doctorName}">Dr. Smith</td>
+            <td th:text="${a.department}">Cardiology</td>
+            <td th:text="${a.type}">Checkup</td>
+            <td th:text="${a.fee > 0 ? '₹' + a.fee : '-'}">₹500</td>
+            <td>
+              <span class="badge badge-blue" th:if="${a.status=='COMPLETED'}">Completed</span>
+              <span class="badge badge-red" th:if="${a.status=='CANCELLED'}">Cancelled</span>
+              <span class="badge badge-gray" th:if="${a.status != 'COMPLETED' and a.status != 'CANCELLED'}" th:text="${a.status}">Status</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</body></html>

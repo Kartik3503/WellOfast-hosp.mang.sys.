@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>My Dashboard — WellOfast Patient Portal</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div class="app">
+  <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <div th:replace="~{fragments/patient-sidebar :: sidebar(${user}, 'dashboard')}"></div>
+  <main class="main fade-in">
+    <div class="topbar">
+      <div><h1>👋 Welcome, <span th:text="${user.fullName}">Patient</span></h1>
+      <div class="sub">Here's your health overview</div></div>
+      <div style="display:flex;gap:.5rem">
+        <a th:href="@{/portal/chat}" class="btn btn-outline">💬 Messages
+          <span th:if="${unreadChats != null and unreadChats > 0}" class="badge badge-red" style="margin-left:.3rem" th:text="${unreadChats}">0</span></a>
+        <a th:href="@{/portal/doctors}" class="btn btn-primary">🔍 Find a Doctor</a>
+      </div>
+    </div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <!-- Health Stats -->
+    <div class="stats">
+      <div class="stat portal-stat">
+        <div class="stat-icon teal">📅</div>
+        <div class="stat-val" th:text="${totalAppointments}">0</div>
+        <div class="stat-label">Total Appointments</div>
+      </div>
+      <div class="stat portal-stat">
+        <div class="stat-icon blue">📋</div>
+        <div class="stat-val" th:text="${totalRecords}">0</div>
+        <div class="stat-label">Medical Records</div>
+      </div>
+      <div class="stat portal-stat">
+        <div class="stat-icon purple">💊</div>
+        <div class="stat-val" th:text="${totalPrescriptions}">0</div>
+        <div class="stat-label">Prescriptions</div>
+      </div>
+      <div class="stat portal-stat">
+        <div class="stat-icon green">👨‍⚕️</div>
+        <div class="stat-val" th:text="${totalDoctors}">0</div>
+        <div class="stat-label">Available Doctors</div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+
+      <!-- Upcoming Appointments -->
+      <div class="card">
+        <div class="card-header"><h2>📅 Upcoming Appointments</h2>
+          <a th:href="@{/portal/appointments}" class="btn btn-outline btn-sm">View All</a></div>
+        <div th:if="${upcomingAppointments.isEmpty()}" class="empty">
+          <div class="empty-icon">📅</div>
+          <h3>No upcoming appointments</h3>
+          <p>Book a doctor to get started</p>
+          <a th:href="@{/portal/doctors}" class="btn btn-primary btn-sm">Find Doctors</a>
+        </div>
+        <div th:if="${!upcomingAppointments.isEmpty()}" class="card-body" style="padding:0">
+          <div th:each="a : ${upcomingAppointments}" class="portal-appt-item">
+            <div class="appt-date-badge">
+              <div class="appt-day" th:text="${#temporals.format(a.date, 'dd')}">15</div>
+              <div class="appt-month" th:text="${#temporals.format(a.date, 'MMM')}">Jun</div>
+            </div>
+            <div class="appt-info">
+              <strong th:text="${a.doctorName}">Dr. Smith</strong>
+              <span th:text="${a.department}">Cardiology</span>
+              <span class="appt-time">🕐 <span th:text="${a.time}">10:00</span></span>
+            </div>
+            <div class="appt-meta">
+              <span class="badge badge-green">Scheduled</span>
+              <span th:if="${a.fee > 0}" class="appt-fee">₹<span th:text="${a.fee}">500</span></span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Medical Records -->
+      <div class="card">
+        <div class="card-header"><h2>📋 Recent Medical Records</h2>
+          <a th:href="@{/portal/records}" class="btn btn-outline btn-sm">View All</a></div>
+        <div th:if="${recentRecords.isEmpty()}" class="empty">
+          <div class="empty-icon">📋</div>
+          <h3>No medical records yet</h3>
+          <p>Your records will appear here after visits</p>
+        </div>
+        <div th:if="${!recentRecords.isEmpty()}" class="card-body" style="padding:0">
+          <div th:each="r : ${recentRecords}" class="portal-record-item">
+            <div class="record-type-icon"
+                 th:classappend="${r.type == 'Surgery' ? 'surgery' : r.type == 'Emergency' ? 'emergency' : r.type == 'Lab Test' ? 'lab' : 'checkup'}">
+              <span th:text="${r.type == 'Surgery' ? '🔪' : r.type == 'Emergency' ? '🚨' : r.type == 'Lab Test' ? '🔬' : r.type == 'Procedure' ? '💉' : '🩺'}">🩺</span>
+            </div>
+            <div class="record-info">
+              <strong th:text="${r.type}">Checkup</strong>
+              <span th:text="${r.diagnosis}">Diagnosis</span>
+              <span class="record-date" th:text="${#temporals.format(r.date, 'dd MMM yyyy')}">15 Jun 2025</span>
+            </div>
+            <a th:href="@{/portal/records/{id}(id=${r.id})}" class="btn btn-outline btn-sm">View</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════ -->
+    <!--  AVAILABLE DOCTORS SECTION                  -->
+    <!-- ═══════════════════════════════════════════ -->
+    <div class="card" style="margin-top:1rem">
+      <div class="card-header"><h2>👨‍⚕️ Available Doctors</h2>
+        <a th:href="@{/portal/doctors}" class="btn btn-outline btn-sm">View All Doctors</a></div>
+      <div th:if="${availableDoctors.isEmpty()}" class="empty">
+        <div class="empty-icon">👨‍⚕️</div>
+        <h3>No doctors available yet</h3>
+        <p>Doctors will appear here once registered by the hospital</p>
+      </div>
+      <div th:if="${!availableDoctors.isEmpty()}" class="dash-doctor-grid">
+        <div th:each="s : ${availableDoctors}" class="dash-doctor-card">
+          <div class="dash-doc-top">
+            <div class="dash-doc-avatar" th:text="${s.doctorName != null ? s.doctorName.substring(0,1) : 'D'}">D</div>
+            <div class="dash-doc-info">
+              <h4 th:text="${s.doctorName}">Dr. Smith</h4>
+              <span class="dash-doc-spec" th:text="${s.specialization}">Cardiology</span>
+              <span class="dash-doc-dept" th:text="${s.department}">Department</span>
+            </div>
+            <div class="dash-doc-fee">
+              <span class="fee-val">₹<span th:text="${s.consultationFee}">500</span></span>
+              <span class="fee-lbl">per visit</span>
+            </div>
+          </div>
+          <div class="dash-doc-details">
+            <div class="dash-doc-detail">
+              <span class="detail-icon">🕐</span>
+              <span th:text="${s.startTime + ' – ' + s.endTime}">09:00 – 17:00</span>
+            </div>
+            <div class="dash-doc-detail">
+              <span class="detail-icon">📅</span>
+              <div class="mini-day-tags">
+                <span th:each="day : ${s.availableDays}" class="mini-day"
+                      th:text="${day.substring(0,3)}">MON</span>
+              </div>
+            </div>
+            <div th:if="${s.qualification != null}" class="dash-doc-detail">
+              <span class="detail-icon">🎓</span>
+              <span th:text="${s.qualification}">MBBS, MD</span>
+            </div>
+            <div class="dash-doc-detail">
+              <span class="detail-icon">👥</span>
+              <span th:text="${s.maxPatientsPerDay + ' slots/day'}">20 slots/day</span>
+            </div>
+          </div>
+          <div class="dash-doc-actions">
+            <a th:href="@{/portal/book/{id}(id=${s.doctorId})}" class="btn btn-primary btn-sm">📅 Book</a>
+            <a th:href="@{/portal/chat/{id}(id=${s.doctorId})}" class="btn btn-outline btn-sm">💬 Chat</a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent Prescriptions -->
+    <div class="card" style="margin-top:1rem">
+      <div class="card-header"><h2>💊 Recent Prescriptions</h2>
+        <a th:href="@{/portal/prescriptions}" class="btn btn-outline btn-sm">View All</a></div>
+      <div th:if="${recentPrescriptions.isEmpty()}" class="empty">
+        <div class="empty-icon">💊</div>
+        <h3>No prescriptions yet</h3>
+        <p>Your prescribed medicines will appear here</p>
+      </div>
+      <table th:if="${!recentPrescriptions.isEmpty()}" class="data-table">
+        <thead><tr><th>Date</th><th>Doctor</th><th>Diagnosis</th><th>Medicines</th><th></th></tr></thead>
+        <tbody>
+          <tr th:each="p : ${recentPrescriptions}">
+            <td th:text="${#temporals.format(p.date, 'dd MMM yyyy')}">15 Jun</td>
+            <td class="name" th:text="${p.doctorName}">Dr. Smith</td>
+            <td th:text="${p.diagnosis}">Diagnosis</td>
+            <td><span class="badge badge-blue" th:text="${p.medicines.size() + ' medicines'}">3 medicines</span></td>
+            <td><a th:href="@{/portal/prescriptions/{id}(id=${p.id})}" class="btn btn-outline btn-sm">View</a></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="portal-quick-actions" style="margin-top:1.5rem">
+      <h3 style="margin-bottom:.75rem;font-size:.9rem;color:var(--text-secondary)">QUICK ACTIONS</h3>
+      <div class="quick-action-grid">
+        <a th:href="@{/portal/doctors}" class="quick-action-card">
+          <div class="qa-icon blue">👨‍⚕️</div>
+          <div class="qa-text"><strong>Find a Doctor</strong><span>Browse available doctors</span></div>
+        </a>
+        <a th:href="@{/portal/appointments}" class="quick-action-card">
+          <div class="qa-icon teal">📅</div>
+          <div class="qa-text"><strong>My Appointments</strong><span>View & manage bookings</span></div>
+        </a>
+        <a th:href="@{/portal/records}" class="quick-action-card">
+          <div class="qa-icon purple">📋</div>
+          <div class="qa-text"><strong>Medical Records</strong><span>View your health history</span></div>
+        </a>
+        <a th:href="@{/portal/chat}" class="quick-action-card">
+          <div class="qa-icon orange">💬</div>
+          <div class="qa-text"><strong>Messages</strong><span>Chat with your doctor</span></div>
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
+</body></html>

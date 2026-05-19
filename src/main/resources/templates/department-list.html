@@ -1,0 +1,23 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org" lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Departments — WellOfast</title><link rel="stylesheet" th:href="@{/css/style.css}"></head><body>
+<div class="app"><button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+<div th:replace="~{fragments/sidebar :: sidebar(${user}, 'departments')}"></div>
+<main class="main fade-in">
+  <div class="topbar"><div><h1>🏢 Departments</h1></div></div>
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div style="display:grid;grid-template-columns:1fr 350px;gap:1rem">
+    <div class="card"><table class="data-table"><thead><tr><th>Name</th><th>Description</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody><tr th:each="d : ${departments}">
+      <td class="name" th:text="${d.name}">Dept</td><td th:text="${d.description ?: '-'}">Desc</td>
+      <td><span class="badge badge-green" th:if="${d.active}">Active</span></td>
+      <td><a th:href="@{/departments/delete/{id}(id=${d.id})}" class="btn btn-danger btn-sm" onclick="return confirm('Delete?')">🗑️</a></td>
+    </tr></tbody></table></div>
+    <div class="card"><div class="card-header"><h2>➕ Add Department</h2></div><div class="card-body">
+      <form th:action="@{/departments/save}" method="post">
+        <div class="form-group"><label>Name <span class="req">*</span></label><input type="text" name="name" class="form-control" required></div>
+        <div class="form-group"><label>Description</label><textarea name="description" class="form-control" rows="2"></textarea></div>
+        <div class="form-group"><label>Head of Department</label><input type="text" name="head" class="form-control"></div>
+        <button type="submit" class="btn btn-primary btn-full">Add Department</button>
+      </form>
+    </div></div>
+  </div>
+</main></div></body></html>

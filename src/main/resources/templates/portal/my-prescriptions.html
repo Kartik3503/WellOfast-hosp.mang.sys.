@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>My Prescriptions — WellOfast Patient Portal</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div class="app">
+  <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <div th:replace="~{fragments/patient-sidebar :: sidebar(${user}, 'prescriptions')}"></div>
+  <main class="main fade-in">
+    <div class="topbar">
+      <div><h1>💊 My Prescriptions</h1>
+      <div class="sub">All prescribed medicines and dosages</div></div>
+    </div>
+
+    <div th:if="${prescriptions.isEmpty()}" class="empty" style="padding:4rem 2rem">
+      <div class="empty-icon">💊</div>
+      <h3>No prescriptions yet</h3>
+      <p>Your prescribed medicines will appear here after visits</p>
+    </div>
+
+    <div th:if="${!prescriptions.isEmpty()}" class="prescription-list">
+      <div th:each="p : ${prescriptions}" class="prescription-card">
+        <div class="presc-header">
+          <div class="presc-icon">💊</div>
+          <div class="presc-header-info">
+            <h3 th:text="${p.diagnosis}">Diagnosis</h3>
+            <span th:text="${'Dr. ' + p.doctorName + ' • ' + p.department}">Dr. Smith • Cardiology</span>
+          </div>
+          <div class="presc-date">
+            <span th:text="${#temporals.format(p.date, 'dd MMM yyyy')}">15 Jun 2025</span>
+          </div>
+        </div>
+        <div class="presc-body">
+          <div class="medicine-table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Medicine</th><th>Type</th><th>Dosage</th><th>Frequency</th><th>Duration</th><th>Instructions</th></tr></thead>
+              <tbody>
+                <tr th:each="med : ${p.medicines}">
+                  <td class="name" th:text="${med.name}">Paracetamol</td>
+                  <td>
+                    <span class="badge badge-blue" th:if="${med.type == 'Tablet'}">💊 Tablet</span>
+                    <span class="badge badge-purple" th:if="${med.type == 'Capsule'}">💊 Capsule</span>
+                    <span class="badge badge-yellow" th:if="${med.type == 'Syrup'}">🧴 Syrup</span>
+                    <span class="badge badge-red" th:if="${med.type == 'Injection'}">💉 Injection</span>
+                    <span class="badge badge-green" th:if="${med.type == 'Ointment'}">🧴 Ointment</span>
+                    <span class="badge badge-gray" th:if="${med.type == 'Drops'}">💧 Drops</span>
+                  </td>
+                  <td th:text="${med.dosage}">500mg</td>
+                  <td th:text="${med.frequency}">Twice a day</td>
+                  <td th:text="${med.duration}">7 days</td>
+                  <td th:text="${med.instructions != null ? med.instructions : '-'}">After meals</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div th:if="${p.instructions != null}" class="presc-general-notes">
+            <strong>General Instructions:</strong> <span th:text="${p.instructions}">Rest and hydrate</span>
+          </div>
+        </div>
+        <div class="presc-footer">
+          <a th:href="@{/portal/prescriptions/{id}(id=${p.id})}" class="btn btn-outline btn-sm">View Full Details</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body></html>

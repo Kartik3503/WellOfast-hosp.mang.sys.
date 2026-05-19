@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Register — WellOfast</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div class="auth-wrap">
+  <div class="auth-box wide">
+    <div class="auth-logo"><div class="logo-icon">W</div><h1>Create Account</h1><p>Register to access WellOfast HMS</p></div>
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+    <div class="auth-card">
+      <form th:action="@{/register}" th:object="${user}" method="post">
+        <div class="form-section"><h3>👤 Personal Information</h3></div>
+        <div class="form-row">
+          <div class="form-group"><label>Full Name <span class="req">*</span></label><input type="text" th:field="*{fullName}" class="form-control" required></div>
+          <div class="form-group"><label>Email</label><input type="email" th:field="*{email}" class="form-control"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Phone</label><input type="tel" th:field="*{phone}" class="form-control"></div>
+          <div class="form-group"><label>Gender</label>
+            <select th:field="*{gender}" class="form-control"><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div>
+        </div>
+        <div class="form-section"><h3>🏥 Role & Department</h3></div>
+        <div class="form-row">
+          <div class="form-group"><label>Role <span class="req">*</span></label>
+           <select th:field="*{role}" class="form-control" required><option value="PATIENT">Patient</option><option value="EMPLOYEE">Employee</option><option value="DOCTOR">Doctor</option><option value="ADMIN">Admin</option></select></div>
+          <div class="form-group"><label>Department</label>
+            <select th:field="*{department}" class="form-control"><option value="">Select</option><option th:each="d : ${departments}" th:value="${d.name}" th:text="${d.name}"></option></select></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Designation</label><input type="text" th:field="*{designation}" class="form-control"></div>
+          <div class="form-group"><label>Specialization (Doctors)</label><input type="text" th:field="*{specialization}" class="form-control"></div>
+        </div>
+        <div class="form-section"><h3>🔑 Login Credentials</h3></div>
+        <div class="form-row">
+          <div class="form-group"><label>Username <span class="req">*</span></label><input type="text" th:field="*{username}" class="form-control" required></div>
+          <div class="form-group"><label>Password <span class="req">*</span></label><input type="password" th:field="*{password}" class="form-control" required minlength="6"></div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full btn-lg" style="margin-top:1rem">Create Account →</button>
+      </form>
+    </div>
+    <div class="auth-footer"><p>Already registered? <a th:href="@{/login}">Sign in</a></p></div>
+  </div>
+</div>
+</body></html>

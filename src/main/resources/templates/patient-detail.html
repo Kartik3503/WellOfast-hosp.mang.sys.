@@ -1,0 +1,26 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org" lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Patient — WellOfast</title><link rel="stylesheet" th:href="@{/css/style.css}"></head><body>
+<div class="app"><button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+<div th:replace="~{fragments/sidebar :: sidebar(${user}, 'patients')}"></div>
+<main class="main fade-in">
+  <div class="topbar"><div><h1 th:text="'🏥 ' + ${patient.name}">Patient</h1></div>
+    <div style="display:flex;gap:.5rem"><a th:href="@{/patients/edit/{id}(id=${patient.id})}" class="btn btn-primary">✏️ Edit</a><a th:href="@{/patients}" class="btn btn-outline">← Back</a></div></div>
+  <div class="detail-card" style="max-width:800px">
+    <div class="detail-header"><h1 th:text="${patient.name}">Name</h1><div class="sub"><span class="badge badge-green" th:if="${patient.status=='ADMITTED'}">Admitted</span><span class="badge badge-blue" th:if="${patient.status=='DISCHARGED'}">Discharged</span><span class="badge badge-gray" th:if="${patient.status=='OPD'}">OPD</span></div></div>
+    <div class="detail-body">
+      <div class="detail-section"><div class="detail-section-title">👤 Personal Info</div><div class="detail-grid">
+        <div class="detail-item"><span class="dlabel">Age</span><span class="dvalue" th:text="${patient.age}">0</span></div>
+        <div class="detail-item"><span class="dlabel">Gender</span><span class="dvalue" th:text="${patient.gender}">M</span></div>
+        <div class="detail-item"><span class="dlabel">Blood Group</span><span class="dvalue" th:text="${patient.bloodGroup ?: 'N/A'}">-</span></div>
+        <div class="detail-item"><span class="dlabel">Phone</span><span class="dvalue" th:text="${patient.phone ?: 'N/A'}">-</span></div>
+      </div></div>
+      <div class="detail-section"><div class="detail-section-title">🏥 Medical Info</div><div class="detail-grid">
+        <div class="detail-item"><span class="dlabel">Doctor</span><span class="dvalue" th:text="${patient.assignedDoctorName ?: 'N/A'}">-</span></div>
+        <div class="detail-item"><span class="dlabel">Department</span><span class="dvalue" th:text="${patient.department ?: 'N/A'}">-</span></div>
+        <div class="detail-item"><span class="dlabel">Room</span><span class="dvalue" th:text="${patient.roomNumber ?: 'N/A'}">-</span></div>
+        <div class="detail-item"><span class="dlabel">Diagnosis</span><span class="dvalue" th:text="${patient.diagnosis ?: 'N/A'}">-</span></div>
+        <div class="detail-item"><span class="dlabel">Admission</span><span class="dvalue" th:text="${patient.admissionDate ?: 'N/A'}">-</span></div>
+        <div class="detail-item"><span class="dlabel">Discharge</span><span class="dvalue" th:text="${patient.dischargeDate ?: 'N/A'}">-</span></div>
+      </div></div>
+    </div>
+  </div>
+</main></div></body></html>

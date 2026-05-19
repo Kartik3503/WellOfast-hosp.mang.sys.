@@ -1,0 +1,20 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org" lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Birth Certificates — WellOfast</title><link rel="stylesheet" th:href="@{/css/style.css}"></head><body>
+<div class="app"><button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+<div th:replace="~{fragments/sidebar :: sidebar(${user}, 'certificates')}"></div>
+<main class="main fade-in">
+  <div class="topbar"><div><h1>📜 Birth Certificates</h1></div><a th:href="@{/certificates/new}" class="btn btn-primary">+ New Certificate</a></div>
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div class="card">
+    <div class="card-header"><h2>Certificate Records</h2>
+      <form th:action="@{/certificates}" method="get" class="search-bar"><input type="text" name="search" th:value="${search}" placeholder="Search by child name..."><button class="btn btn-primary btn-sm">🔍</button><a th:if="${search}" th:href="@{/certificates}" class="btn btn-outline btn-sm">✕</a></form></div>
+    <table class="data-table"><thead><tr><th>Cert No.</th><th>Child Name</th><th>Gender</th><th>DOB</th><th>Mother</th><th>Father</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody><tr th:each="c : ${certificates}">
+      <td class="mono" th:text="${c.certificateNumber}">BC-001</td>
+      <td class="name" th:text="${c.childName}">Name</td><td th:text="${c.gender}">M</td>
+      <td th:text="${c.dateOfBirth}">DOB</td><td th:text="${c.motherName}">Mother</td><td th:text="${c.fatherName}">Father</td>
+      <td><span class="badge badge-green">Issued</span></td>
+      <td class="actions"><a th:href="@{/certificates/view/{id}(id=${c.id})}" class="btn btn-outline btn-sm">👁️</a><a th:href="@{/certificates/download/{id}(id=${c.id})}" class="btn btn-primary btn-sm">📥</a></td>
+    </tr></tbody></table>
+    <div th:if="${certificates.isEmpty()}" class="empty"><div class="empty-icon">📜</div><h3>No certificates</h3><a th:href="@{/certificates/new}" class="btn btn-primary">+ Create</a></div>
+  </div>
+</main></div></body></html>

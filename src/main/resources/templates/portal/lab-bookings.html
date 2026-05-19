@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>My Lab Bookings — WellOfast Patient Portal</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div class="app">
+  <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <div th:replace="~{fragments/patient-sidebar :: sidebar(${user}, 'lab-tests')}"></div>
+  <main class="main fade-in">
+    <div class="topbar">
+      <div><h1>📋 My Lab Bookings</h1><div class="sub">Track your test results</div></div>
+      <a th:href="@{/portal/lab-tests}" class="btn btn-primary">🩸 Book New Test</a>
+    </div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <div th:if="${bookings.isEmpty()}" class="empty" style="padding:4rem 2rem">
+      <div class="empty-icon">📋</div>
+      <h3>No lab bookings yet</h3>
+      <p>Book a lab test to see your results here</p>
+      <a th:href="@{/portal/lab-tests}" class="btn btn-primary btn-sm">Browse Tests</a>
+    </div>
+
+    <div th:if="${!bookings.isEmpty()}" class="notif-list">
+      <div th:each="b : ${bookings}" class="lab-booking-card"
+           th:classappend="${b.status == 'COMPLETED' ? 'completed' : b.status == 'CANCELLED' ? 'cancelled' : ''}">
+        <div class="lab-booking-left">
+          <div class="lab-booking-icon"
+               th:classappend="${b.testCategory == 'BLOOD' ? 'blood' : b.testCategory == 'CARDIAC' ? 'cardiac' : 'other'}">
+            <span th:text="${b.testCategory == 'BLOOD' ? '🩸' : b.testCategory == 'URINE' ? '🧪' : b.testCategory == 'CARDIAC' ? '❤️' : '🔬'}">🩸</span>
+          </div>
+          <div>
+            <h4 th:text="${b.testName}">Test Name</h4>
+            <span class="lab-booking-date" th:text="${'Scheduled: ' + #temporals.format(b.scheduledDate, 'dd MMM yyyy')}">Date</span>
+          </div>
+        </div>
+        <div class="lab-booking-center">
+          <span class="badge"
+                th:classappend="${b.status == 'BOOKED' ? 'badge-blue' : b.status == 'SAMPLE_COLLECTED' ? 'badge-yellow' : b.status == 'PROCESSING' ? 'badge-purple' : b.status == 'COMPLETED' ? 'badge-green' : 'badge-gray'}"
+                th:text="${b.status}">Status</span>
+          <span class="lab-price">₹<span th:text="${b.price}">500</span></span>
+        </div>
+        <div th:if="${b.status == 'COMPLETED'}" class="lab-result-section">
+          <div class="lab-result-header">
+            <span class="lab-result-badge"
+                  th:classappend="${b.resultStatus == 'NORMAL' ? 'normal' : b.resultStatus == 'ABNORMAL' ? 'abnormal' : 'critical'}"
+                  th:text="${b.resultStatus}">NORMAL</span>
+          </div>
+          <div class="lab-result-details">
+            <div><span class="dlabel">Result:</span> <strong th:text="${b.resultValue}">Value</strong></div>
+            <div th:if="${b.normalRange != null}"><span class="dlabel">Normal Range:</span> <span th:text="${b.normalRange}">Range</span></div>
+            <div th:if="${b.doctorNotes != null}"><span class="dlabel">Notes:</span> <span th:text="${b.doctorNotes}">Notes</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body></html>

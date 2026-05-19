@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<!-- Patient Sidebar Fragment -->
+<aside th:fragment="sidebar(user, active)" class="sidebar patient-sidebar" id="sidebar">
+    <div class="sidebar-brand patient-brand">
+        <div class="brand-icon patient-icon">W</div>
+        <div><h2>WellOfast</h2><span>Patient Portal</span></div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-label">My Health</div>
+        <a th:href="@{/portal/dashboard}" th:classappend="${active=='dashboard'?'active':''}" class="nav-item"><span class="icon">🏠</span> Dashboard</a>
+        <a th:href="@{/portal/appointments}" th:classappend="${active=='appointments'?'active':''}" class="nav-item"><span class="icon">📅</span> My Appointments</a>
+        <a th:href="@{/portal/records}" th:classappend="${active=='records'?'active':''}" class="nav-item"><span class="icon">📋</span> Medical Records</a>
+        <a th:href="@{/portal/prescriptions}" th:classappend="${active=='prescriptions'?'active':''}" class="nav-item"><span class="icon">💊</span> Prescriptions</a>
+        <a th:href="@{/portal/health-tracker}" th:classappend="${active=='health-tracker'?'active':''}" class="nav-item"><span class="icon">📈</span> Health Tracker</a>
+
+        <div class="nav-label">Services</div>
+        <a th:href="@{/portal/doctors}" th:classappend="${active=='doctors'?'active':''}" class="nav-item"><span class="icon">👨‍⚕️</span> Find Doctors</a>
+        <a th:href="@{/portal/lab-tests}" th:classappend="${active=='lab-tests'?'active':''}" class="nav-item"><span class="icon">🩸</span> Lab Tests</a>
+        <a th:href="@{/portal/emergency}" th:classappend="${active=='emergency'?'active':''}" class="nav-item" style="color: #EF4444;"><span class="icon">🆘</span> Emergency SOS</a>
+        <a th:href="@{/portal/chat}" th:classappend="${active=='chat'?'active':''}" class="nav-item">
+            <span class="icon">💬</span> Messages
+            <span th:if="${unreadChats != null and unreadChats > 0}" class="nav-badge" th:text="${unreadChats}">0</span>
+        </a>
+
+        <div class="nav-label">Account</div>
+        <a th:href="@{/portal/notifications}" th:classappend="${active=='notifications'?'active':''}" class="nav-item">
+            <span class="icon">🔔</span> Notifications
+            <span th:if="${unreadNotifs != null and unreadNotifs > 0}" class="nav-badge" th:text="${unreadNotifs}">0</span>
+        </a>
+        <a th:href="@{/portal/profile}" th:classappend="${active=='profile'?'active':''}" class="nav-item"><span class="icon">👤</span> My Profile</a>
+    </nav>
+    <div class="sidebar-footer">
+        <div class="sidebar-user">
+            <div class="avatar patient-avatar" th:text="${user.fullName != null ? user.fullName.substring(0,1) : 'P'}">P</div>
+            <div class="user-info">
+                <strong th:text="${user.fullName}">Patient</strong>
+                <span>Patient</span>
+            </div>
+        </div>
+        <form th:action="@{/logout}" method="post" style="margin:0;">
+            <button type="submit" class="btn btn-outline btn-full btn-sm">🚪 Logout</button>
+        </form>
+    </div>
+</aside>
+</html>

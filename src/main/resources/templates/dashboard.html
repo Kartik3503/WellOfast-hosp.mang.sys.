@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Dashboard — WellOfast</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div class="app">
+  <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <div th:replace="~{fragments/sidebar :: sidebar(${user}, 'dashboard')}"></div>
+  <main class="main fade-in">
+    <div class="topbar">
+      <div><h1>Dashboard</h1><div class="sub">Welcome back, <strong th:text="${user.fullName}">User</strong></div></div>
+      <div style="display:flex;gap:.5rem">
+        <a th:if="${user.role=='ADMIN' or user.role=='DOCTOR'}" th:href="@{/patients/new}" class="btn btn-primary">+ New Patient</a>
+        <a th:if="${user.role=='ADMIN' or user.role=='DOCTOR'}" th:href="@{/appointments/new}" class="btn btn-outline">+ Appointment</a>
+      </div>
+    </div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat"><div class="stat-icon teal">🏥</div><div class="stat-val" th:text="${totalPatients}">0</div><div class="stat-label">Total Patients</div></div>
+      <div class="stat"><div class="stat-icon green">🛏️</div><div class="stat-val" th:text="${admittedPatients}">0</div><div class="stat-label">Admitted</div></div>
+      <div class="stat"><div class="stat-icon blue">👨‍⚕️</div><div class="stat-val" th:text="${totalDoctors}">0</div><div class="stat-label">Doctors</div></div>
+      <div class="stat"><div class="stat-icon purple">👥</div><div class="stat-val" th:text="${totalEmployees}">0</div><div class="stat-label">Employees</div></div>
+      <div class="stat"><div class="stat-icon orange">📅</div><div class="stat-val" th:text="${todayAppointments}">0</div><div class="stat-label">Today's Appts</div></div>
+      <div class="stat"><div class="stat-icon red">🌴</div><div class="stat-val" th:text="${pendingLeaves}">0</div><div class="stat-label">Pending Leaves</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+      <!-- Today's Appointments -->
+      <div class="card">
+        <div class="card-header"><h2>📅 Today's Appointments</h2><a th:href="@{/appointments}" class="btn btn-outline btn-sm">View All</a></div>
+        <div th:if="${recentAppointments.isEmpty()}" class="empty"><div class="empty-icon">📅</div><h3>No appointments today</h3></div>
+        <table th:if="${!recentAppointments.isEmpty()}" class="data-table">
+          <thead><tr><th>Time</th><th>Patient</th><th>Doctor</th><th>Status</th></tr></thead>
+          <tbody><tr th:each="a : ${recentAppointments}">
+            <td th:text="${a.time}">09:00</td>
+            <td class="name" th:text="${a.patientName}">Patient</td>
+            <td th:text="${a.doctorName}">Doctor</td>
+            <td><span class="badge badge-green" th:if="${a.status=='SCHEDULED'}">Scheduled</span><span class="badge badge-blue" th:if="${a.status=='COMPLETED'}">Done</span><span class="badge badge-red" th:if="${a.status=='CANCELLED'}">Cancelled</span></td>
+          </tr></tbody>
+        </table>
+      </div>
+
+      <!-- Recent Patients -->
+      <div class="card">
+        <div class="card-header"><h2>🏥 Recent Patients</h2><a th:href="@{/patients}" class="btn btn-outline btn-sm">View All</a></div>
+        <div th:if="${recentPatients.isEmpty()}" class="empty"><div class="empty-icon">🏥</div><h3>No patients yet</h3></div>
+        <table th:if="${!recentPatients.isEmpty()}" class="data-table">
+          <thead><tr><th>Name</th><th>Gender</th><th>Department</th><th>Status</th></tr></thead>
+          <tbody><tr th:each="p : ${recentPatients}">
+            <td class="name" th:text="${p.name}">Patient</td>
+            <td th:text="${p.gender}">M</td>
+            <td th:text="${p.department}">Dept</td>
+            <td><span class="badge badge-green" th:if="${p.status=='ADMITTED'}">Admitted</span><span class="badge badge-blue" th:if="${p.status=='DISCHARGED'}">Discharged</span><span class="badge badge-gray" th:if="${p.status=='OPD'}">OPD</span></td>
+          </tr></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+</body></html>

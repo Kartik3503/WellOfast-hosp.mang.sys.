@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Emergency SOS — WellOfast Patient Portal</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div class="app">
+  <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <div th:replace="~{fragments/patient-sidebar :: sidebar(${user}, 'emergency')}"></div>
+  <main class="main fade-in">
+    <div class="topbar">
+      <div><h1>🆘 Emergency SOS</h1><div class="sub">Get immediate medical help</div></div>
+    </div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <!-- SOS Button Section -->
+    <div class="sos-hero">
+      <div class="sos-pulse-ring"></div>
+      <div class="sos-main-btn" onclick="document.getElementById('sosModal').style.display='flex'">
+        <span class="sos-icon">🆘</span>
+        <span class="sos-text">TAP FOR EMERGENCY</span>
+      </div>
+      <p class="sos-desc">Press the button to alert all available doctors and request immediate assistance</p>
+      <div class="sos-contacts">
+        <div class="sos-contact"><span>🚑</span> Ambulance: <strong>108</strong></div>
+        <div class="sos-contact"><span>🏥</span> Hospital: <strong>+91-9876543210</strong></div>
+        <div class="sos-contact"><span>👮</span> Police: <strong>100</strong></div>
+      </div>
+    </div>
+
+    <!-- SOS Modal -->
+    <div id="sosModal" class="sos-modal" style="display:none">
+      <div class="sos-modal-content">
+        <div class="sos-modal-header">
+          <h2>🚨 Trigger Emergency Alert</h2>
+          <button onclick="document.getElementById('sosModal').style.display='none'" class="sos-modal-close">✕</button>
+        </div>
+        <form th:action="@{/portal/emergency/sos}" method="post">
+          <div class="form-group">
+            <label>Emergency Type <span class="req">*</span></label>
+            <select name="emergencyType" class="form-control" required>
+              <option value="MEDICAL">🏥 Medical Emergency</option>
+              <option value="CARDIAC">❤️ Cardiac / Heart Attack</option>
+              <option value="BREATHING">🫁 Breathing Difficulty</option>
+              <option value="ACCIDENT">🚗 Accident / Trauma</option>
+              <option value="OTHER">⚠️ Other Emergency</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Description (optional)</label>
+            <textarea name="description" class="form-control" rows="3" placeholder="Describe symptoms or situation..."></textarea>
+          </div>
+          <div class="sos-warning-box">
+            ⚠️ <strong>This will immediately alert all available doctors</strong> and hospital staff.
+            Only use in genuine emergencies.
+          </div>
+          <button type="submit" class="btn sos-confirm-btn">🚨 SEND EMERGENCY ALERT</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Alert History -->
+    <div class="card" style="margin-top:2rem">
+      <div class="card-header"><h2>📋 My Emergency History</h2></div>
+      <div th:if="${myAlerts.isEmpty()}" class="empty">
+        <div class="empty-icon">✅</div><h3>No emergency alerts</h3>
+        <p>You haven't triggered any emergency alerts</p>
+      </div>
+      <div th:if="${!myAlerts.isEmpty()}" class="card-body" style="padding:0">
+        <div th:each="a : ${myAlerts}" class="sos-history-item"
+             th:classappend="${a.status == 'ACTIVE' ? 'active' : a.status == 'RESPONDING' ? 'responding' : 'resolved'}">
+          <div class="sos-history-icon">
+            <span th:text="${a.status == 'ACTIVE' ? '🔴' : a.status == 'RESPONDING' ? '🟡' : '🟢'}">🔴</span>
+          </div>
+          <div class="sos-history-info">
+            <strong th:text="${a.emergencyType}">MEDICAL</strong>
+            <span th:if="${a.description != null}" th:text="${a.description}">Description</span>
+            <span class="sos-history-time" th:text="${#temporals.format(a.createdAt, 'dd MMM yyyy, HH:mm')}">Date</span>
+          </div>
+          <div class="sos-history-status">
+            <span class="badge"
+                  th:classappend="${a.status == 'ACTIVE' ? 'badge-red' : a.status == 'RESPONDING' ? 'badge-yellow' : 'badge-green'}"
+                  th:text="${a.status}">Status</span>
+            <div th:if="${a.respondedByDoctorName != null}" class="sos-responder">
+              👨‍⚕️ <span th:text="${a.respondedByDoctorName}">Doctor</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body></html>

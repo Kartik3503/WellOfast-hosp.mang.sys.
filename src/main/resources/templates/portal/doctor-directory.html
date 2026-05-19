@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Find Doctors — WellOfast Patient Portal</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div class="app">
+  <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <div th:replace="~{fragments/patient-sidebar :: sidebar(${user}, 'doctors')}"></div>
+  <main class="main fade-in">
+    <div class="topbar">
+      <div><h1>👨‍⚕️ Find a Doctor</h1>
+      <div class="sub">Browse available doctors and book appointments</div></div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-body" style="display:flex;gap:1rem;align-items:flex-end;flex-wrap:wrap">
+        <form th:action="@{/portal/doctors}" method="get" style="display:flex;gap:.75rem;align-items:flex-end;flex-wrap:wrap;width:100%">
+          <div class="form-group" style="flex:1;min-width:180px;margin-bottom:0">
+            <label>Department</label>
+            <select name="dept" class="form-control" onchange="this.form.submit()">
+              <option value="">All Departments</option>
+              <option th:each="d : ${departments}" th:value="${d.name}" th:text="${d.name}"
+                      th:selected="${d.name == selectedDept}">Dept</option>
+            </select>
+          </div>
+          <div class="form-group" style="flex:2;min-width:200px;margin-bottom:0">
+            <label>Search Doctor / Specialization</label>
+            <input type="text" name="search" class="form-control" placeholder="e.g. Cardiology, Neurology..."
+                   th:value="${searchQuery}">
+          </div>
+          <button type="submit" class="btn btn-primary">🔍 Search</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Doctor Cards Grid -->
+    <div th:if="${schedules.isEmpty()}" class="empty" style="padding:4rem 2rem">
+      <div class="empty-icon">👨‍⚕️</div>
+      <h3>No doctors found</h3>
+      <p>Try changing your search filters</p>
+    </div>
+
+    <div class="doctor-grid">
+      <div th:each="s : ${schedules}" class="doctor-card">
+        <div class="doctor-card-header">
+          <div class="doctor-avatar" th:text="${s.doctorName != null ? s.doctorName.substring(0,1) : 'D'}">D</div>
+          <div class="doctor-header-info">
+            <h3 th:text="${s.doctorName}">Dr. Smith</h3>
+            <span class="doctor-spec" th:text="${s.specialization}">Cardiology</span>
+          </div>
+          <div class="doctor-fee-badge">
+            <span class="fee-amount">₹<span th:text="${s.consultationFee}">500</span></span>
+            <span class="fee-label">per visit</span>
+          </div>
+        </div>
+        <div class="doctor-card-body">
+          <div class="doctor-detail-row">
+            <span class="doctor-label">🏥 Department</span>
+            <span th:text="${s.department}">Cardiology</span>
+          </div>
+          <div class="doctor-detail-row" th:if="${s.qualification != null}">
+            <span class="doctor-label">🎓 Qualification</span>
+            <span th:text="${s.qualification}">MBBS, MD</span>
+          </div>
+          <div class="doctor-detail-row">
+            <span class="doctor-label">🕐 Timings</span>
+            <span th:text="${s.startTime + ' - ' + s.endTime}">09:00 - 17:00</span>
+          </div>
+          <div class="doctor-detail-row">
+            <span class="doctor-label">📅 Available</span>
+            <div class="day-tags">
+              <span th:each="day : ${s.availableDays}" class="day-tag"
+                    th:text="${day.substring(0,3)}">MON</span>
+            </div>
+          </div>
+          <div class="doctor-detail-row">
+            <span class="doctor-label">👥 Max/Day</span>
+            <span th:text="${s.maxPatientsPerDay + ' patients'}">20 patients</span>
+          </div>
+        </div>
+        <div class="doctor-card-footer">
+          <a th:href="@{/portal/book/{id}(id=${s.doctorId})}" class="btn btn-primary" style="flex:1">
+            📅 Book Appointment
+          </a>
+          <a th:href="@{/portal/chat/{id}(id=${s.doctorId})}" class="btn btn-outline" title="Chat with doctor">
+            💬 Chat
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body></html>

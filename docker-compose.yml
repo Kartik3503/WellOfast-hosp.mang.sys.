@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  wellofast-mongodb:
+    image: mongo:6.0
+    container_name: wellofast-mongodb
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - wellofast-mongo-data:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=wellofast_db
+    networks:
+      - wellofast-network
+
+  wellofast-app:
+    build: .
+    container_name: wellofast-app
+    restart: always
+    ports:
+      - "80:8080"
+    environment:
+      - SPRING_DATA_MONGODB_URI=mongodb://wellofast-mongodb:27017/wellofast_db
+      - SPRING_PROFILES_ACTIVE=prod
+    depends_on:
+      - wellofast-mongodb
+    networks:
+      - wellofast-network
+
+volumes:
+  wellofast-mongo-data:
+
+networks:
+  wellofast-network:
+    driver: bridge

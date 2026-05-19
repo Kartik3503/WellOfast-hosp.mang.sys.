@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Prescription Detail — WellOfast Patient Portal</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div class="app">
+  <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <div th:replace="~{fragments/patient-sidebar :: sidebar(${user}, 'prescriptions')}"></div>
+  <main class="main fade-in">
+    <div class="topbar">
+      <div><h1>💊 Prescription Details</h1></div>
+      <div style="display:flex;gap:.5rem">
+        <a th:href="@{/portal/prescriptions/{id}/pdf(id=${prescription.id})}" class="btn btn-primary">📄 Download PDF</a>
+        <a th:href="@{/portal/prescriptions}" class="btn btn-outline">← Back to Prescriptions</a>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <div class="detail-header" style="background:linear-gradient(135deg,#8B5CF6,#6D28D9)">
+        <h1 th:text="${prescription.diagnosis}">Diagnosis</h1>
+        <div class="sub" th:text="${#temporals.format(prescription.date, 'dd MMMM yyyy')}">15 June 2025</div>
+      </div>
+      <div class="detail-body">
+        <div class="detail-section">
+          <div class="detail-section-title">Prescribing Doctor</div>
+          <div class="detail-grid">
+            <div class="detail-item"><div class="dlabel">Doctor</div><div class="dvalue" th:text="${prescription.doctorName}">Dr. Smith</div></div>
+            <div class="detail-item"><div class="dlabel">Department</div><div class="dvalue" th:text="${prescription.department}">Cardiology</div></div>
+            <div class="detail-item"><div class="dlabel">Date</div><div class="dvalue" th:text="${#temporals.format(prescription.date, 'dd MMM yyyy')}">15 Jun</div></div>
+          </div>
+        </div>
+
+        <div class="detail-section">
+          <div class="detail-section-title">Prescribed Medicines</div>
+          <div th:each="med,iter : ${prescription.medicines}" class="medicine-detail-card">
+            <div class="med-number" th:text="${iter.index + 1}">1</div>
+            <div class="med-info-grid">
+              <div class="med-name">
+                <strong th:text="${med.name}">Paracetamol</strong>
+                <span class="badge badge-blue" th:if="${med.type == 'Tablet'}">💊 Tablet</span>
+                <span class="badge badge-purple" th:if="${med.type == 'Capsule'}">💊 Capsule</span>
+                <span class="badge badge-yellow" th:if="${med.type == 'Syrup'}">🧴 Syrup</span>
+                <span class="badge badge-red" th:if="${med.type == 'Injection'}">💉 Injection</span>
+                <span class="badge badge-green" th:if="${med.type == 'Ointment'}">🧴 Ointment</span>
+                <span class="badge badge-gray" th:if="${med.type == 'Drops'}">💧 Drops</span>
+              </div>
+              <div class="med-details-row">
+                <div><span class="dlabel">Dosage</span><span class="dvalue" th:text="${med.dosage}">500mg</span></div>
+                <div><span class="dlabel">Frequency</span><span class="dvalue" th:text="${med.frequency}">Twice a day</span></div>
+                <div><span class="dlabel">Duration</span><span class="dvalue" th:text="${med.duration}">7 days</span></div>
+              </div>
+              <div th:if="${med.instructions != null}" class="med-instructions">
+                📝 <span th:text="${med.instructions}">After meals</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div th:if="${prescription.instructions != null}" class="detail-section">
+          <div class="detail-section-title">General Instructions</div>
+          <div class="general-instructions-box" th:text="${prescription.instructions}">Rest and hydrate</div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body></html>

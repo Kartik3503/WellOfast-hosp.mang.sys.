@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Book Appointment — WellOfast Patient Portal</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div class="app">
+  <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <div th:replace="~{fragments/patient-sidebar :: sidebar(${user}, 'doctors')}"></div>
+  <main class="main fade-in">
+    <div class="topbar">
+      <div><h1>📅 Book Appointment</h1>
+      <div class="sub">Schedule your visit</div></div>
+      <a th:href="@{/portal/doctors}" class="btn btn-outline">← Back to Doctors</a>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+
+    <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:1.5rem">
+
+      <!-- Doctor Info Card -->
+      <div>
+        <div class="card">
+          <div class="card-body" style="text-align:center;padding:2rem">
+            <div class="doctor-avatar-lg" th:text="${doctor.fullName.substring(0,1)}">D</div>
+            <h2 style="margin-top:.75rem" th:text="${doctor.fullName}">Dr. Smith</h2>
+            <p style="color:var(--text-muted);margin-top:.2rem" th:text="${doctor.specialization != null ? doctor.specialization : doctor.department}">Cardiology</p>
+            <div style="margin-top:1.2rem">
+              <div class="book-info-row"><span>🏥 Department</span><strong th:text="${doctor.department}">Dept</strong></div>
+              <div class="book-info-row" th:if="${schedule.qualification != null}"><span>🎓 Qualification</span><strong th:text="${schedule.qualification}">MBBS</strong></div>
+              <div class="book-info-row"><span>🕐 Timings</span><strong th:text="${schedule.startTime + ' - ' + schedule.endTime}">09:00-17:00</strong></div>
+              <div class="book-info-row"><span>💰 Fee</span><strong class="fee-highlight">₹<span th:text="${schedule.consultationFee}">500</span></strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Booking Form -->
+      <div class="card">
+        <div class="card-header"><h2>Select Date & Time</h2></div>
+        <div class="card-body">
+          <form th:action="@{/portal/book}" method="post">
+            <input type="hidden" name="doctorId" th:value="${doctor.id}">
+
+            <!-- Date Selection -->
+            <div class="form-group">
+              <label>Choose a Date <span class="req">*</span></label>
+              <div th:if="${availableDates.isEmpty()}" class="alert alert-warning" style="margin-top:.5rem">
+                No available slots in the next 14 days. Please try another doctor.
+              </div>
+              <div class="date-slot-grid" th:if="${!availableDates.isEmpty()}">
+                <label th:each="d : ${availableDates}" class="date-slot">
+                  <input type="radio" name="date" th:value="${d.date}" required>
+                  <div class="date-slot-inner">
+                    <span class="ds-day" th:text="${d.dayName}">Mon</span>
+                    <span class="ds-date" th:text="${#temporals.format(d.date, 'dd MMM')}">15 Jun</span>
+                    <span class="ds-slots" th:text="${d.slotsLeft + ' slots'}">5 slots</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Time Selection -->
+            <div class="form-group" th:if="${!timeSlots.isEmpty()}">
+              <label>Choose a Time <span class="req">*</span></label>
+              <div class="time-slot-grid">
+                <label th:each="t : ${timeSlots}" class="time-slot">
+                  <input type="radio" name="time" th:value="${t}" required>
+                  <div class="time-slot-inner" th:text="${t}">09:00</div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Appointment Type -->
+            <div class="form-group">
+              <label>Visit Type <span class="req">*</span></label>
+              <select name="type" class="form-control" required>
+                <option value="">Select type</option>
+                <option value="Checkup">General Checkup</option>
+                <option value="Follow-up">Follow-up Visit</option>
+                <option value="Consultation">Consultation</option>
+                <option value="Emergency">Emergency</option>
+              </select>
+            </div>
+
+            <!-- Notes -->
+            <div class="form-group">
+              <label>Symptoms / Notes (Optional)</label>
+              <textarea name="notes" class="form-control" placeholder="Describe your symptoms or reason for visit..." rows="3"></textarea>
+            </div>
+
+            <!-- Summary -->
+            <div class="booking-summary">
+              <div class="summary-row"><span>Consultation Fee</span><strong>₹<span th:text="${schedule.consultationFee}">500</span></strong></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary btn-full btn-lg" th:if="${!availableDates.isEmpty()}" style="margin-top:1rem">
+              ✅ Confirm Booking
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body></html>

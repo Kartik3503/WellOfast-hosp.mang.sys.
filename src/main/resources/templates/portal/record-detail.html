@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Record Detail — WellOfast Patient Portal</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div class="app">
+  <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <div th:replace="~{fragments/patient-sidebar :: sidebar(${user}, 'records')}"></div>
+  <main class="main fade-in">
+    <div class="topbar">
+      <div><h1>📋 Record Details</h1></div>
+      <div style="display:flex;gap:.5rem">
+        <a th:href="@{/portal/records/{id}/pdf(id=${record.id})}" class="btn btn-primary">📄 Download PDF</a>
+        <a th:href="@{/portal/records}" class="btn btn-outline">← Back to Records</a>
+      </div>
+    </div>
+
+    <div class="detail-card">
+      <div class="detail-header">
+        <h1 th:text="${record.type + ' — ' + record.diagnosis}">Checkup — Diagnosis</h1>
+        <div class="sub" th:text="${#temporals.format(record.date, 'dd MMMM yyyy')}">15 June 2025</div>
+      </div>
+      <div class="detail-body">
+        <!-- Doctor & General Info -->
+        <div class="detail-section">
+          <div class="detail-section-title">General Information</div>
+          <div class="detail-grid">
+            <div class="detail-item"><div class="dlabel">Doctor</div><div class="dvalue" th:text="${record.doctorName}">Dr. Smith</div></div>
+            <div class="detail-item"><div class="dlabel">Department</div><div class="dvalue" th:text="${record.department}">Cardiology</div></div>
+            <div class="detail-item"><div class="dlabel">Type</div><div class="dvalue" th:text="${record.type}">Checkup</div></div>
+            <div class="detail-item"><div class="dlabel">Date</div><div class="dvalue" th:text="${#temporals.format(record.date, 'dd MMM yyyy')}">15 Jun</div></div>
+          </div>
+        </div>
+
+        <!-- Diagnosis & Treatment -->
+        <div class="detail-section">
+          <div class="detail-section-title">Diagnosis & Treatment</div>
+          <div class="detail-grid">
+            <div class="detail-item"><div class="dlabel">Diagnosis</div><div class="dvalue" th:text="${record.diagnosis}">—</div></div>
+            <div class="detail-item"><div class="dlabel">Treatment</div><div class="dvalue" th:text="${record.treatment != null ? record.treatment : '—'}">—</div></div>
+          </div>
+          <div th:if="${record.notes != null}" style="margin-top:.75rem">
+            <div class="dlabel">Doctor Notes</div>
+            <div class="dvalue" th:text="${record.notes}">—</div>
+          </div>
+        </div>
+
+        <!-- Vitals -->
+        <div th:if="${record.bloodPressure != null or record.heartRate != null}" class="detail-section">
+          <div class="detail-section-title">Vitals</div>
+          <div class="vitals-grid">
+            <div th:if="${record.bloodPressure != null}" class="vital-card"><span class="vital-icon">🫀</span><div><strong th:text="${record.bloodPressure}">120/80</strong><span>Blood Pressure</span></div></div>
+            <div th:if="${record.heartRate != null}" class="vital-card"><span class="vital-icon">💓</span><div><strong th:text="${record.heartRate}">72</strong><span>Heart Rate (bpm)</span></div></div>
+            <div th:if="${record.temperature != null}" class="vital-card"><span class="vital-icon">🌡️</span><div><strong th:text="${record.temperature}">98.6</strong><span>Temperature (°F)</span></div></div>
+            <div th:if="${record.weight != null}" class="vital-card"><span class="vital-icon">⚖️</span><div><strong th:text="${record.weight}">70</strong><span>Weight (kg)</span></div></div>
+            <div th:if="${record.oxygenSaturation != null}" class="vital-card"><span class="vital-icon">🫁</span><div><strong th:text="${record.oxygenSaturation}">98</strong><span>SpO2 (%)</span></div></div>
+          </div>
+        </div>
+
+        <!-- Procedures -->
+        <div th:if="${!record.procedures.isEmpty()}" class="detail-section">
+          <div class="detail-section-title">Procedures Performed</div>
+          <div class="tag-list">
+            <span th:each="p : ${record.procedures}" class="procedure-tag-lg">🔧 <span th:text="${p}">Procedure</span></span>
+          </div>
+        </div>
+
+        <!-- Injections -->
+        <div th:if="${!record.injections.isEmpty()}" class="detail-section">
+          <div class="detail-section-title">Injections Administered</div>
+          <div class="tag-list">
+            <span th:each="i : ${record.injections}" class="injection-tag-lg">💉 <span th:text="${i}">Injection</span></span>
+          </div>
+        </div>
+
+        <!-- Lab Results -->
+        <div th:if="${record.labTestName != null}" class="detail-section">
+          <div class="detail-section-title">Lab Results</div>
+          <div class="lab-result-detail">
+            <div class="detail-grid">
+              <div class="detail-item"><div class="dlabel">Test Name</div><div class="dvalue" th:text="${record.labTestName}">CBC</div></div>
+              <div class="detail-item"><div class="dlabel">Result</div><div class="dvalue" th:text="${record.labResult}">Normal</div></div>
+              <div class="detail-item" th:if="${record.labNormalRange != null}"><div class="dlabel">Normal Range</div><div class="dvalue" th:text="${record.labNormalRange}">4.5-11.0</div></div>
+              <div class="detail-item" th:if="${record.labStatus != null}"><div class="dlabel">Status</div>
+                <div class="dvalue">
+                  <span class="badge badge-green" th:if="${record.labStatus == 'Normal'}">Normal</span>
+                  <span class="badge badge-yellow" th:if="${record.labStatus == 'Abnormal'}">Abnormal</span>
+                  <span class="badge badge-red" th:if="${record.labStatus == 'Critical'}">Critical</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body></html>

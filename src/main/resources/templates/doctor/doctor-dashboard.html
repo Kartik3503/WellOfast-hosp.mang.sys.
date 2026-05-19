@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Doctor Dashboard — WellOfast</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div class="app">
+  <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <!-- Doctor Sidebar -->
+  <aside class="sidebar doctor-sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="brand-icon doctor-icon">W</div><div><h2>WellOfast</h2><span>Doctor Portal</span></div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Dashboard</div>
+      <a href="/doctor/dashboard" class="nav-item active"><span class="icon">📊</span> My Dashboard</a>
+      <a href="/appointments" class="nav-item"><span class="icon">📅</span> Appointments</a>
+      <a href="/patients" class="nav-item"><span class="icon">🏥</span> Patients</a>
+      <div class="nav-label">Communication</div>
+      <a href="/doctor/chat" class="nav-item"><span class="icon">💬</span> Messages
+        <span th:if="${unreadChats > 0}" class="nav-badge" th:text="${unreadChats}">0</span></a>
+      <a href="/doctor/notifications" class="nav-item"><span class="icon">🔔</span> Notifications
+        <span th:if="${unreadNotifs > 0}" class="nav-badge" th:text="${unreadNotifs}">0</span></a>
+      <div class="nav-label">Services</div>
+      <a href="/certificates" class="nav-item"><span class="icon">📜</span> Birth Certificates</a>
+      <a href="/leaves" class="nav-item"><span class="icon">🌴</span> Leave Management</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar doctor-avatar-sm" th:text="${user.fullName.substring(0,1)}">D</div>
+        <div class="user-info"><strong th:text="${user.fullName}">Doctor</strong><span th:text="${user.department}">Dept</span></div>
+      </div>
+      <form th:action="@{/logout}" method="post" style="margin:0;">
+        <button type="submit" class="btn btn-outline btn-full btn-sm">🚪 Logout</button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="main fade-in">
+    <div class="topbar">
+      <div><h1>👨‍⚕️ Welcome, <span th:text="${user.fullName}">Doctor</span></h1>
+      <div class="sub" th:text="${user.specialization != null ? user.specialization : user.department}">Specialization</div></div>
+      <div style="display:flex;gap:.5rem">
+        <a href="/doctor/chat" class="btn btn-outline">💬 Messages <span th:if="${unreadChats > 0}" class="badge badge-red" style="margin-left:.3rem" th:text="${unreadChats}">0</span></a>
+        <a href="/doctor/notifications" class="btn btn-outline">🔔 <span th:if="${unreadNotifs > 0}" class="badge badge-red" style="margin-left:.3rem" th:text="${unreadNotifs}">0</span></a>
+      </div>
+    </div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <!-- Stats Row 1 -->
+    <div class="stats">
+      <div class="stat doc-stat"><div class="stat-icon teal">📅</div>
+        <div class="stat-val" th:text="${todayCount}">0</div><div class="stat-label">Today's Patients</div></div>
+      <div class="stat doc-stat"><div class="stat-icon blue">⏳</div>
+        <div class="stat-val" th:text="${scheduledToday}">0</div><div class="stat-label">Scheduled Today</div></div>
+      <div class="stat doc-stat"><div class="stat-icon green">✅</div>
+        <div class="stat-val" th:text="${completedAppointments}">0</div><div class="stat-label">Completed</div></div>
+      <div class="stat doc-stat"><div class="stat-icon purple">📋</div>
+        <div class="stat-val" th:text="${totalRecords}">0</div><div class="stat-label">Records Filed</div></div>
+    </div>
+
+    <!-- Stats Row 2: Earnings -->
+    <div class="stats" style="margin-top:.75rem">
+      <div class="stat earning-stat"><div class="stat-icon earn-green">💰</div>
+        <div class="stat-val earn-val">₹<span th:text="${#numbers.formatDecimal(totalEarnings,1,0)}">0</span></div><div class="stat-label">Total Earnings</div></div>
+      <div class="stat earning-stat"><div class="stat-icon earn-blue">📈</div>
+        <div class="stat-val earn-val">₹<span th:text="${#numbers.formatDecimal(monthlyEarnings,1,0)}">0</span></div><div class="stat-label">This Month</div></div>
+      <div class="stat earning-stat"><div class="stat-icon earn-purple">💊</div>
+        <div class="stat-val" th:text="${totalPrescriptions}">0</div><div class="stat-label">Prescriptions</div></div>
+      <div class="stat earning-stat"><div class="stat-icon earn-teal">📋</div>
+        <div class="stat-val" th:text="${totalAppointments}">0</div><div class="stat-label">Total Appointments</div></div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:1rem">
+      <!-- Today's Appointments -->
+      <div class="card">
+        <div class="card-header"><h2>🕐 Today's Patients</h2>
+          <span class="badge badge-blue" th:text="${todayCount + ' patients'}">0</span></div>
+        <div th:if="${todayAppointments.isEmpty()}" class="empty">
+          <div class="empty-icon">📅</div><h3>No patients today</h3><p>Enjoy your day off!</p></div>
+        <div th:if="${!todayAppointments.isEmpty()}" class="card-body" style="padding:0">
+          <div th:each="a : ${todayAppointments}" class="portal-appt-item">
+            <div class="appt-date-badge" style="width:42px;height:42px;border-radius:50%">
+              <div class="appt-day" style="font-size:.9rem" th:text="${a.patientName.substring(0,1)}">P</div>
+            </div>
+            <div class="appt-info">
+              <strong th:text="${a.patientName}">Patient</strong>
+              <span th:text="${a.type}">Checkup</span>
+              <span class="appt-time">🕐 <span th:text="${a.time}">10:00</span></span>
+            </div>
+            <div class="appt-meta">
+              <span class="badge badge-green" th:if="${a.status=='SCHEDULED'}">Scheduled</span>
+              <span class="badge badge-blue" th:if="${a.status=='COMPLETED'}">Done</span>
+              <span class="badge badge-red" th:if="${a.status=='CANCELLED'}">Cancelled</span>
+            </div>
+            <div class="appt-actions" th:if="${a.status=='SCHEDULED'}">
+              <a th:href="@{/doctor/complete/{id}(id=${a.id})}" class="btn btn-primary btn-sm"
+                 onclick="return confirm('Mark as completed?')">✅ Complete</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upcoming Appointments -->
+      <div class="card">
+        <div class="card-header"><h2>📅 Upcoming Appointments</h2></div>
+        <div th:if="${upcomingAppointments.isEmpty()}" class="empty">
+          <div class="empty-icon">📅</div><h3>No upcoming appointments</h3></div>
+        <table th:if="${!upcomingAppointments.isEmpty()}" class="data-table">
+          <thead><tr><th>Date</th><th>Time</th><th>Patient</th><th>Type</th><th>Fee</th></tr></thead>
+          <tbody>
+            <tr th:each="a : ${upcomingAppointments}">
+              <td th:text="${#temporals.format(a.date, 'dd MMM')}">15 Jun</td>
+              <td th:text="${a.time}">10:00</td>
+              <td class="name" th:text="${a.patientName}">Patient</td>
+              <td th:text="${a.type}">Checkup</td>
+              <td>₹<span th:text="${a.fee}">0</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Recent Records -->
+    <div class="card" style="margin-top:1rem">
+      <div class="card-header"><h2>📋 Recent Medical Records Filed</h2></div>
+      <div th:if="${recentRecords.isEmpty()}" class="empty"><div class="empty-icon">📋</div><h3>No records yet</h3></div>
+      <table th:if="${!recentRecords.isEmpty()}" class="data-table">
+        <thead><tr><th>Date</th><th>Patient</th><th>Type</th><th>Diagnosis</th></tr></thead>
+        <tbody>
+          <tr th:each="r : ${recentRecords}">
+            <td th:text="${#temporals.format(r.date, 'dd MMM yyyy')}">15 Jun</td>
+            <td class="name" th:text="${r.patientName}">Patient</td>
+            <td><span class="badge badge-blue" th:text="${r.type}">Checkup</span></td>
+            <td th:text="${r.diagnosis}">Diagnosis</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+</body></html>

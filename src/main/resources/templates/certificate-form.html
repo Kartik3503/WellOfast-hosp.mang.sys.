@@ -1,0 +1,37 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org" lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>New Certificate — WellOfast</title><link rel="stylesheet" th:href="@{/css/style.css}"></head><body>
+<div class="app"><button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+<div th:replace="~{fragments/sidebar :: sidebar(${user}, 'certificates')}"></div>
+<main class="main fade-in">
+  <div class="topbar"><div><h1>📜 New Birth Certificate</h1></div><a th:href="@{/certificates}" class="btn btn-outline">← Back</a></div>
+  <div class="card" style="max-width:900px"><div class="card-body">
+    <form th:action="@{/certificates/save}" th:object="${certificate}" method="post">
+      <div class="form-section"><h3>👶 Child Details</h3></div>
+      <div class="form-row"><div class="form-group"><label>Child's Name <span class="req">*</span></label><input type="text" th:field="*{childName}" class="form-control" required></div>
+      <div class="form-group"><label>Gender <span class="req">*</span></label><select th:field="*{gender}" class="form-control" required><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div></div>
+      <div class="form-row"><div class="form-group"><label>Date of Birth <span class="req">*</span></label><input type="date" th:field="*{dateOfBirth}" class="form-control" required></div>
+      <div class="form-group"><label>Time of Birth <span class="req">*</span></label><input type="time" th:field="*{timeOfBirth}" class="form-control" required></div></div>
+      <div class="form-group"><label>Place of Birth <span class="req">*</span></label><input type="text" th:field="*{placeOfBirth}" class="form-control" required></div>
+      <div class="form-row"><div class="form-group"><label>Weight</label><input type="text" th:field="*{birthWeight}" class="form-control"></div>
+      <div class="form-group"><label>Blood Group</label><select th:field="*{bloodGroup}" class="form-control"><option value="">Select</option><option value="A+">A+</option><option value="A-">A-</option><option value="B+">B+</option><option value="B-">B-</option><option value="AB+">AB+</option><option value="AB-">AB-</option><option value="O+">O+</option><option value="O-">O-</option></select></div></div>
+
+      <div class="form-section"><h3>👩 Mother's Details</h3></div>
+      <div class="form-row"><div class="form-group"><label>Name <span class="req">*</span></label><input type="text" th:field="*{motherName}" class="form-control" required></div>
+      <div class="form-group"><label>Age</label><input type="text" th:field="*{motherAge}" class="form-control"></div></div>
+      <div class="form-row"><div class="form-group"><label>Nationality</label><input type="text" th:field="*{motherNationality}" class="form-control"></div>
+      <div class="form-group"><label>Occupation</label><input type="text" th:field="*{motherOccupation}" class="form-control"></div></div>
+
+      <div class="form-section"><h3>👨 Father's Details</h3></div>
+      <div class="form-row"><div class="form-group"><label>Name <span class="req">*</span></label><input type="text" th:field="*{fatherName}" class="form-control" required></div>
+      <div class="form-group"><label>Age</label><input type="text" th:field="*{fatherAge}" class="form-control"></div></div>
+      <div class="form-row"><div class="form-group"><label>Nationality</label><input type="text" th:field="*{fatherNationality}" class="form-control"></div>
+      <div class="form-group"><label>Occupation</label><input type="text" th:field="*{fatherOccupation}" class="form-control"></div></div>
+
+      <div class="form-section"><h3>🩺 Doctor</h3></div>
+      <div class="form-row"><div class="form-group"><label>Attending Doctor</label><input type="text" th:field="*{attendingDoctorName}" class="form-control"></div>
+      <div class="form-group"><label>Reg No.</label><input type="text" th:field="*{attendingDoctorRegistrationNumber}" class="form-control"></div></div>
+
+      <div class="alert alert-info" style="margin-top:1rem">ℹ️ Certificate will be sanctioned by <strong th:text="${user.fullName}">You</strong> (<span th:text="${user.designation}">Designation</span>)</div>
+      <button type="submit" class="btn btn-primary btn-lg" style="margin-top:.5rem">📄 Generate Certificate</button>
+    </form>
+  </div></div>
+</main></div></body></html>

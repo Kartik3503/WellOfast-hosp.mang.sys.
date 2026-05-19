@@ -1,0 +1,72 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org" lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Staff Form — WellOfast</title><link rel="stylesheet" th:href="@{/css/style.css}"></head><body>
+<div class="app"><button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+<div th:replace="~{fragments/sidebar :: sidebar(${user}, 'staff')}"></div>
+<main class="main fade-in">
+  <div class="topbar"><div><h1 th:text="${staffMember.id != null ? '✏️ Edit Staff' : '➕ Add Staff'}">Staff</h1></div><a th:href="@{/staff}" class="btn btn-outline">← Back</a></div>
+  <div class="card" style="max-width:900px"><div class="card-body">
+    <form th:action="@{/staff/save}" th:object="${staffMember}" method="post">
+      <input type="hidden" th:field="*{id}">
+      <div class="form-section"><h3>👤 Personal Info</h3></div>
+      <div class="form-row"><div class="form-group"><label>Full Name <span class="req">*</span></label><input type="text" th:field="*{fullName}" class="form-control" required></div>
+      <div class="form-group"><label>Email</label><input type="email" th:field="*{email}" class="form-control"></div></div>
+      <div class="form-row"><div class="form-group"><label>Phone</label><input type="tel" th:field="*{phone}" class="form-control"></div>
+      <div class="form-group"><label>Gender</label><select th:field="*{gender}" class="form-control"><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option></select></div></div>
+      <div class="form-section"><h3>🏥 Work Info</h3></div>
+      <div class="form-row"><div class="form-group"><label>Role <span class="req">*</span></label><select th:field="*{role}" class="form-control" required id="roleSelect" onchange="toggleDoctorFields()"><option value="EMPLOYEE">Employee</option><option value="DOCTOR">Doctor</option><option value="ADMIN">Admin</option></select></div>
+      <div class="form-group"><label>Department</label><select th:field="*{department}" class="form-control"><option value="">Select</option><option th:each="d : ${departments}" th:value="${d.name}" th:text="${d.name}"></option></select></div></div>
+      <div class="form-row"><div class="form-group"><label>Designation</label><input type="text" th:field="*{designation}" class="form-control"></div>
+      <div class="form-group"><label>Employee ID</label><input type="text" th:field="*{employeeId}" class="form-control"></div></div>
+      <div class="form-row"><div class="form-group"><label>Specialization</label><input type="text" th:field="*{specialization}" class="form-control"></div>
+      <div class="form-group"><label>Salary</label><input type="number" th:field="*{salary}" class="form-control"></div></div>
+
+      <!-- ═══ Doctor Schedule Fields (shown only for DOCTOR role) ═══ -->
+      <div id="doctorFields" style="display:none">
+        <div class="form-section"><h3>🩺 Doctor Schedule & Availability</h3>
+          <span style="font-size:.8rem;color:var(--text-secondary)">These details will be visible to patients in the portal</span>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Consultation Fee (₹) <span class="req">*</span></label>
+            <input type="number" name="consultationFee" class="form-control" min="0" step="50"
+                   th:value="${schedule != null ? schedule.consultationFee : 500}" placeholder="500"></div>
+          <div class="form-group"><label>Qualification</label>
+            <input type="text" name="qualification" class="form-control" placeholder="e.g. MBBS, MD, DM"
+                   th:value="${schedule != null ? schedule.qualification : ''}"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Start Time</label>
+            <input type="time" name="startTime" class="form-control"
+                   th:value="${schedule != null and schedule.startTime != null ? schedule.startTime : '09:00'}"></div>
+          <div class="form-group"><label>End Time</label>
+            <input type="time" name="endTime" class="form-control"
+                   th:value="${schedule != null and schedule.endTime != null ? schedule.endTime : '17:00'}"></div>
+          <div class="form-group"><label>Max Patients/Day</label>
+            <input type="number" name="maxPatientsPerDay" class="form-control" min="1"
+                   th:value="${schedule != null ? schedule.maxPatientsPerDay : 20}"></div>
+        </div>
+        <div class="form-group">
+          <label>Available Days</label>
+          <div class="day-check-grid">
+            <label class="day-check" th:each="day : ${ {'MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'} }">
+              <input type="checkbox" name="availableDays" th:value="${day}"
+                     th:checked="${schedule != null and schedule.availableDays != null and schedule.availableDays.contains(day)}">
+              <span th:text="${day.substring(0,3)}">MON</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div th:if="${staffMember.id == null}" class="form-section"><h3>🔑 Credentials</h3></div>
+      <div th:if="${staffMember.id == null}" class="form-row"><div class="form-group"><label>Username <span class="req">*</span></label><input type="text" th:field="*{username}" class="form-control" required></div>
+      <div class="form-group"><label>Password</label><input type="password" th:field="*{password}" class="form-control" placeholder="Default: welcome123"></div></div>
+      <button type="submit" class="btn btn-primary btn-lg" style="margin-top:1rem">💾 Save Staff Member</button>
+    </form>
+  </div></div>
+</main></div>
+<script>
+function toggleDoctorFields() {
+    const role = document.getElementById('roleSelect').value;
+    document.getElementById('doctorFields').style.display = role === 'DOCTOR' ? 'block' : 'none';
+}
+toggleDoctorFields(); // run on page load for edit mode
+</script>
+</body></html>

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Messages — WellOfast Doctor</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div class="app">
+  <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <aside class="sidebar doctor-sidebar" id="sidebar">
+    <div class="sidebar-brand"><div class="brand-icon doctor-icon">W</div><div><h2>WellOfast</h2><span>Doctor Portal</span></div></div>
+    <nav class="sidebar-nav">
+      <div class="nav-label">Dashboard</div>
+      <a href="/doctor/dashboard" class="nav-item"><span class="icon">📊</span> My Dashboard</a>
+      <a href="/appointments" class="nav-item"><span class="icon">📅</span> Appointments</a>
+      <a href="/patients" class="nav-item"><span class="icon">🏥</span> Patients</a>
+      <div class="nav-label">Communication</div>
+      <a href="/doctor/chat" class="nav-item active"><span class="icon">💬</span> Messages
+        <span th:if="${unreadChats > 0}" class="nav-badge" th:text="${unreadChats}">0</span></a>
+      <a href="/doctor/notifications" class="nav-item"><span class="icon">🔔</span> Notifications
+        <span th:if="${unreadNotifs > 0}" class="nav-badge" th:text="${unreadNotifs}">0</span></a>
+      <div class="nav-label">Services</div>
+      <a href="/certificates" class="nav-item"><span class="icon">📜</span> Birth Certificates</a>
+      <a href="/leaves" class="nav-item"><span class="icon">🌴</span> Leave Management</a>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-user">
+        <div class="avatar doctor-avatar-sm" th:text="${user.fullName.substring(0,1)}">D</div>
+        <div class="user-info"><strong th:text="${user.fullName}">Doctor</strong><span th:text="${user.department}">Dept</span></div>
+      </div>
+      <form th:action="@{/logout}" method="post" style="margin:0;"><button type="submit" class="btn btn-outline btn-full btn-sm">🚪 Logout</button></form>
+    </div>
+  </aside>
+
+  <main class="main fade-in" style="padding:0;display:flex;flex-direction:column;height:100vh">
+    <div class="chat-layout">
+      <div class="chat-sidebar">
+        <div class="chat-sidebar-header"><h3>💬 Messages</h3></div>
+        <div class="chat-conv-list">
+          <div th:if="${conversations == null or conversations.isEmpty()}" class="chat-empty-conv">
+            <p>No messages yet</p><small>Patient messages will appear here</small>
+          </div>
+          <a th:each="c : ${conversations}" th:href="@{/doctor/chat/{id}(id=${c.otherUserId})}"
+             class="chat-conv-item" th:classappend="${otherUser != null and otherUser.id == c.otherUserId ? 'active' : ''}">
+            <div class="chat-conv-avatar" th:text="${#strings.substring(c.otherUserName,0,1)}">P</div>
+            <div class="chat-conv-info">
+              <div class="chat-conv-name">
+                <strong th:text="${c.otherUserName}">Patient</strong>
+                <span class="chat-conv-time" th:text="${#temporals.format(c.lastTimestamp, 'HH:mm')}">12:00</span>
+              </div>
+              <div class="chat-conv-last">
+                <span th:text="${#strings.length(c.lastMessage) > 40 ? #strings.substring(c.lastMessage,0,40) + '...' : c.lastMessage}">msg</span>
+                <span th:if="${c.unreadCount > 0}" class="chat-unread-badge" th:text="${c.unreadCount}">1</span>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <div class="chat-main">
+        <div th:if="${otherUser == null}" class="chat-no-selection">
+          <div class="chat-no-icon">💬</div><h3>Select a patient</h3><p>Choose a conversation to reply</p>
+        </div>
+        <div th:if="${otherUser != null}" class="chat-active">
+          <div class="chat-header">
+            <div class="chat-header-user">
+              <div class="chat-header-avatar patient-chat-avatar" th:text="${otherUser.fullName.substring(0,1)}">P</div>
+              <div><strong th:text="${otherUser.fullName}">Patient</strong><span>Patient</span></div>
+            </div>
+          </div>
+          <div class="chat-messages" id="chatMessages">
+            <div th:if="${messages == null or messages.isEmpty()}" class="chat-start-msg">
+              <p>No messages in this conversation yet.</p>
+            </div>
+            <div th:each="msg : ${messages}" class="chat-message" th:classappend="${msg.senderId == user.id ? 'sent' : 'received'}">
+              <div class="msg-bubble">
+                <div class="msg-text" th:text="${msg.message}">Hello</div>
+                <div class="msg-time" th:text="${#temporals.format(msg.timestamp, 'HH:mm')}">12:00</div>
+              </div>
+            </div>
+          </div>
+          <div class="chat-input-area">
+            <form id="chatForm" onsubmit="sendMessage(event)">
+              <input type="hidden" id="receiverId" th:value="${otherUser.id}">
+              <div class="chat-input-row">
+                <input type="text" id="messageInput" class="form-control" placeholder="Type your reply..." autocomplete="off" required>
+                <button type="submit" class="btn btn-primary">Send ➤</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script>
+function sendMessage(e) {
+    e.preventDefault();
+    const receiverId = document.getElementById('receiverId').value;
+    const input = document.getElementById('messageInput');
+    const message = input.value.trim();
+    if (!message) return;
+    fetch('/api/chat/send', {method:'POST',headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({receiverId,message})
+    }).then(r=>r.json()).then(msg=>{
+        const div=document.createElement('div');
+        div.className='chat-message sent';
+        div.innerHTML=`<div class="msg-bubble"><div class="msg-text">${msg.message}</div><div class="msg-time">${new Date(msg.timestamp).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}</div></div>`;
+        document.getElementById('chatMessages').appendChild(div);
+        div.scrollIntoView({behavior:'smooth'});
+        input.value='';
+    });
+}
+document.getElementById('chatMessages')?.scrollTo(0,document.getElementById('chatMessages').scrollHeight);
+</script>
+</body></html>

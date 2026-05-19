@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Medical Records — WellOfast Patient Portal</title><link rel="stylesheet" th:href="@{/css/style.css}"></head>
+<body>
+<div class="app">
+  <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <div th:replace="~{fragments/patient-sidebar :: sidebar(${user}, 'records')}"></div>
+  <main class="main fade-in">
+    <div class="topbar">
+      <div><h1>📋 Medical Records</h1>
+      <div class="sub">Your complete health history</div></div>
+    </div>
+
+    <div th:if="${records.isEmpty()}" class="empty" style="padding:4rem 2rem">
+      <div class="empty-icon">📋</div>
+      <h3>No medical records yet</h3>
+      <p>Your health records will appear here after your visits</p>
+    </div>
+
+    <div th:if="${!records.isEmpty()}" class="records-timeline">
+      <div th:each="r : ${records}" class="record-card">
+        <div class="record-card-left">
+          <div class="record-type-badge"
+               th:classappend="${r.type == 'Surgery' ? 'surgery' : r.type == 'Emergency' ? 'emergency' : r.type == 'Lab Test' ? 'lab' : r.type == 'Procedure' ? 'procedure' : 'checkup'}">
+            <span th:text="${r.type == 'Surgery' ? '🔪' : r.type == 'Emergency' ? '🚨' : r.type == 'Lab Test' ? '🔬' : r.type == 'Procedure' ? '💉' : r.type == 'Follow-up' ? '🔄' : '🩺'}">🩺</span>
+          </div>
+          <div class="record-date-info">
+            <span class="record-date-day" th:text="${#temporals.format(r.date, 'dd')}">15</span>
+            <span class="record-date-month" th:text="${#temporals.format(r.date, 'MMM yyyy')}">Jun 2025</span>
+          </div>
+        </div>
+        <div class="record-card-center">
+          <h3>
+            <span th:text="${r.type}">Checkup</span>
+            <span class="badge badge-blue" th:if="${r.labStatus == 'Normal'}">Normal</span>
+            <span class="badge badge-yellow" th:if="${r.labStatus == 'Abnormal'}">Abnormal</span>
+            <span class="badge badge-red" th:if="${r.labStatus == 'Critical'}">Critical</span>
+          </h3>
+          <p class="record-diagnosis" th:text="${r.diagnosis}">Diagnosis description</p>
+          <div class="record-meta-tags">
+            <span class="meta-tag" th:text="${r.doctorName}">Dr. Smith</span>
+            <span class="meta-tag" th:text="${r.department}">Cardiology</span>
+            <span th:if="${r.treatment != null}" class="meta-tag" th:text="${'Treatment: ' + r.treatment}">Treatment</span>
+          </div>
+
+          <!-- Vitals -->
+          <div th:if="${r.bloodPressure != null or r.heartRate != null or r.temperature != null}" class="record-vitals">
+            <span th:if="${r.bloodPressure != null}" class="vital-tag">🫀 BP: <strong th:text="${r.bloodPressure}">120/80</strong></span>
+            <span th:if="${r.heartRate != null}" class="vital-tag">💓 HR: <strong th:text="${r.heartRate}">72</strong> bpm</span>
+            <span th:if="${r.temperature != null}" class="vital-tag">🌡️ Temp: <strong th:text="${r.temperature}">98.6</strong>°F</span>
+            <span th:if="${r.weight != null}" class="vital-tag">⚖️ Wt: <strong th:text="${r.weight}">70</strong> kg</span>
+            <span th:if="${r.oxygenSaturation != null}" class="vital-tag">🫁 SpO2: <strong th:text="${r.oxygenSaturation}">98</strong>%</span>
+          </div>
+
+          <!-- Procedures & Injections -->
+          <div th:if="${!r.procedures.isEmpty()}" class="record-tags-row">
+            <span class="tag-label">Procedures:</span>
+            <span th:each="proc : ${r.procedures}" class="procedure-tag">🔧 <span th:text="${proc}">Procedure</span></span>
+          </div>
+          <div th:if="${!r.injections.isEmpty()}" class="record-tags-row">
+            <span class="tag-label">Injections:</span>
+            <span th:each="inj : ${r.injections}" class="injection-tag">💉 <span th:text="${inj}">Injection</span></span>
+          </div>
+
+          <!-- Lab Results -->
+          <div th:if="${r.labTestName != null}" class="lab-result-box">
+            <div class="lab-header">🔬 Lab Test: <strong th:text="${r.labTestName}">CBC</strong></div>
+            <div class="lab-details">
+              <span>Result: <strong th:text="${r.labResult}">Normal</strong></span>
+              <span th:if="${r.labNormalRange != null}">Normal Range: <strong th:text="${r.labNormalRange}">4.5-11.0</strong></span>
+            </div>
+          </div>
+        </div>
+        <div class="record-card-right">
+          <a th:href="@{/portal/records/{id}(id=${r.id})}" class="btn btn-outline btn-sm">View Details</a>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+</body></html>

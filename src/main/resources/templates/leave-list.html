@@ -1,0 +1,19 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org" lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Leave Management — WellOfast</title><link rel="stylesheet" th:href="@{/css/style.css}"></head><body>
+<div class="app"><button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+<div th:replace="~{fragments/sidebar :: sidebar(${user}, 'leaves')}"></div>
+<main class="main fade-in">
+  <div class="topbar"><div><h1>🌴 Leave Management</h1><div class="sub"><span th:text="${pendingCount}">0</span> pending requests</div></div><a th:href="@{/leaves/new}" class="btn btn-primary">+ Apply Leave</a></div>
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div class="card"><table class="data-table"><thead><tr><th>Employee</th><th>Department</th><th>Type</th><th>From</th><th>To</th><th>Reason</th><th>Status</th><th th:if="${user.role=='ADMIN'}">Actions</th></tr></thead>
+  <tbody><tr th:each="l : ${leaves}">
+    <td class="name" th:text="${l.userName}">Name</td><td th:text="${l.department ?: '-'}">Dept</td>
+    <td th:text="${l.leaveType}">Sick</td><td th:text="${l.fromDate}">From</td><td th:text="${l.toDate}">To</td>
+    <td th:text="${l.reason ?: '-'}">Reason</td>
+    <td><span class="badge badge-yellow" th:if="${l.status=='PENDING'}">Pending</span><span class="badge badge-green" th:if="${l.status=='APPROVED'}">Approved</span><span class="badge badge-red" th:if="${l.status=='REJECTED'}">Rejected</span></td>
+    <td th:if="${user.role=='ADMIN'}" class="actions">
+      <a th:if="${l.status=='PENDING'}" th:href="@{/leaves/approve/{id}(id=${l.id})}" class="btn btn-success btn-sm">✓</a>
+      <a th:if="${l.status=='PENDING'}" th:href="@{/leaves/reject/{id}(id=${l.id})}" class="btn btn-danger btn-sm">✕</a></td>
+  </tr></tbody></table>
+  <div th:if="${leaves.isEmpty()}" class="empty"><div class="empty-icon">🌴</div><h3>No leave requests</h3></div>
+  </div>
+</main></div></body></html>

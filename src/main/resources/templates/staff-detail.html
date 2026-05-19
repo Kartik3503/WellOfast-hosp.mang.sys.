@@ -1,0 +1,39 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org" lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Staff Detail — WellOfast</title><link rel="stylesheet" th:href="@{/css/style.css}"></head><body>
+<div class="app"><button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+<div th:replace="~{fragments/sidebar :: sidebar(${user}, 'staff')}"></div>
+<main class="main fade-in">
+  <div class="topbar"><div><h1 th:text="'👤 ' + ${staffMember.fullName}">Staff</h1></div>
+    <div style="display:flex;gap:.5rem"><a th:href="@{/staff/edit/{id}(id=${staffMember.id})}" class="btn btn-primary">✏️ Edit</a><a th:href="@{/staff}" class="btn btn-outline">← Back</a></div></div>
+  <div style="display:grid;grid-template-columns:300px 1fr;gap:1rem;max-width:900px">
+    <!-- Profile Card -->
+    <div class="profile-card">
+      <div class="profile-avatar" th:text="${staffMember.fullName.substring(0,1)}">R</div>
+      <div class="profile-name" th:text="${staffMember.fullName}">Name</div>
+      <div class="profile-role" th:text="${staffMember.designation ?: staffMember.role}">Role</div>
+      <div class="profile-info">
+        <div class="p-row"><span class="p-label">Employee ID</span><span class="p-val" th:text="${staffMember.employeeId ?: '-'}">WO-001</span></div>
+        <div class="p-row"><span class="p-label">Role</span><span class="p-val" th:text="${staffMember.role}">ADMIN</span></div>
+        <div class="p-row"><span class="p-label">Department</span><span class="p-val" th:text="${staffMember.department ?: '-'}">Dept</span></div>
+        <div class="p-row"><span class="p-label">Phone</span><span class="p-val" th:text="${staffMember.phone ?: '-'}">Phone</span></div>
+        <div class="p-row"><span class="p-label">Email</span><span class="p-val" th:text="${staffMember.email ?: '-'}">Email</span></div>
+        <div class="p-row"><span class="p-label">Gender</span><span class="p-val" th:text="${staffMember.gender ?: '-'}">M</span></div>
+        <div class="p-row"><span class="p-label">Joining Date</span><span class="p-val" th:text="${staffMember.joiningDate ?: '-'}">Date</span></div>
+        <div class="p-row"><span class="p-label">Salary</span><span class="p-val" th:text="'₹' + ${staffMember.salary}">₹0</span></div>
+        <div class="p-row"><span class="p-label">Status</span><span class="p-val"><span class="badge badge-green" th:if="${staffMember.active}">Active</span><span class="badge badge-red" th:unless="${staffMember.active}">Inactive</span></span></div>
+      </div>
+    </div>
+    <!-- Details -->
+    <div class="detail-card">
+      <div class="detail-body">
+        <div class="detail-section"><div class="detail-section-title">🏥 Professional Details</div>
+          <div class="detail-grid">
+            <div class="detail-item"><span class="dlabel">Specialization</span><span class="dvalue" th:text="${staffMember.specialization ?: 'N/A'}">-</span></div>
+            <div class="detail-item"><span class="dlabel">License No.</span><span class="dvalue" th:text="${staffMember.licenseNumber ?: 'N/A'}">-</span></div>
+            <div class="detail-item"><span class="dlabel">Address</span><span class="dvalue" th:text="${staffMember.address ?: 'N/A'}">-</span></div>
+            <div class="detail-item"><span class="dlabel">City</span><span class="dvalue" th:text="${staffMember.city ?: 'N/A'}">-</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main></div></body></html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org" lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Patient Form — WellOfast</title><link rel="stylesheet" th:href="@{/css/style.css}"></head><body>
+<div class="app"><button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+<div th:replace="~{fragments/sidebar :: sidebar(${user}, 'patients')}"></div>
+<main class="main fade-in">
+  <div class="topbar"><div><h1 th:text="${patient.id != null ? '✏️ Edit Patient' : '➕ Add Patient'}">Patient</h1></div><a th:href="@{/patients}" class="btn btn-outline">← Back</a></div>
+  <div class="card" style="max-width:800px"><div class="card-body">
+    <form th:action="@{/patients/save}" th:object="${patient}" method="post">
+      <input type="hidden" th:field="*{id}">
+      <div class="form-section"><h3>👤 Patient Info</h3></div>
+      <div class="form-row"><div class="form-group"><label>Name <span class="req">*</span></label><input type="text" th:field="*{name}" class="form-control" required></div>
+      <div class="form-group"><label>Age</label><input type="number" th:field="*{age}" class="form-control"></div></div>
+      <div class="form-row"><div class="form-group"><label>Gender <span class="req">*</span></label><select th:field="*{gender}" class="form-control" required><option value="">Select</option><option value="Male">Male</option><option value="Female">Female</option><option value="Other">Other</option></select></div>
+      <div class="form-group"><label>Blood Group</label><select th:field="*{bloodGroup}" class="form-control"><option value="">Select</option><option th:each="bg : ${ {'A+','A-','B+','B-','AB+','AB-','O+','O-'} }" th:value="${bg}" th:text="${bg}"></option></select></div></div>
+      <div class="form-row"><div class="form-group"><label>Phone</label><input type="tel" th:field="*{phone}" class="form-control"></div>
+      <div class="form-group"><label>Email</label><input type="email" th:field="*{email}" class="form-control"></div></div>
+      <div class="form-group"><label>Address</label><textarea th:field="*{address}" class="form-control" rows="2"></textarea></div>
+      <div class="form-section"><h3>🏥 Medical Info</h3></div>
+      <div class="form-row"><div class="form-group"><label>Assigned Doctor</label><select th:field="*{assignedDoctorId}" class="form-control"><option value="">Select Doctor</option><option th:each="d : ${doctors}" th:value="${d.id}" th:text="${d.fullName + ' (' + (d.specialization != null ? d.specialization : d.department) + ')'}"></option></select></div>
+      <div class="form-group"><label>Department</label><input type="text" th:field="*{department}" class="form-control"></div></div>
+      <div class="form-row"><div class="form-group"><label>Status</label><select th:field="*{status}" class="form-control"><option value="OPD">OPD</option><option value="ADMITTED">Admitted</option><option value="DISCHARGED">Discharged</option></select></div>
+      <div class="form-group"><label>Room Number</label><input type="text" th:field="*{roomNumber}" class="form-control"></div></div>
+      <div class="form-row"><div class="form-group"><label>Admission Date</label><input type="date" th:field="*{admissionDate}" class="form-control"></div>
+      <div class="form-group"><label>Discharge Date</label><input type="date" th:field="*{dischargeDate}" class="form-control"></div></div>
+      <div class="form-group"><label>Diagnosis</label><textarea th:field="*{diagnosis}" class="form-control" rows="2"></textarea></div>
+      <div class="form-group"><label>Notes</label><textarea th:field="*{notes}" class="form-control" rows="2"></textarea></div>
+      <button type="submit" class="btn btn-primary btn-lg" style="margin-top:1rem">💾 Save Patient</button>
+    </form>
+  </div></div>
+</main></div></body></html>

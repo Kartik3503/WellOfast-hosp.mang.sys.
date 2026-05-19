@@ -1,0 +1,28 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org" lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Staff — WellOfast</title><link rel="stylesheet" th:href="@{/css/style.css}"></head><body>
+<div class="app"><button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+<div th:replace="~{fragments/sidebar :: sidebar(${user}, 'staff')}"></div>
+<main class="main fade-in">
+  <div class="topbar"><div><h1>👥 Staff Management</h1><div class="sub">Manage doctors, nurses, and employees</div></div>
+    <div style="display:flex;gap:.5rem">
+      <a th:href="@{/staff(role='DOCTOR')}" class="btn btn-outline btn-sm">Doctors</a>
+      <a th:href="@{/staff(role='EMPLOYEE')}" class="btn btn-outline btn-sm">Employees</a>
+      <a th:href="@{/staff(role='ADMIN')}" class="btn btn-outline btn-sm">Admins</a>
+      <a th:href="@{/staff}" class="btn btn-outline btn-sm">All</a>
+      <a th:href="@{/staff/new}" class="btn btn-primary">+ Add Staff</a></div></div>
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
+  <div class="card">
+    <table class="data-table"><thead><tr><th>ID</th><th>Name</th><th>Role</th><th>Department</th><th>Designation</th><th>Phone</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody><tr th:each="s : ${staff}">
+      <td class="mono" th:text="${s.employeeId ?: '-'}">WO-001</td>
+      <td class="name" th:text="${s.fullName}">Name</td>
+      <td><span class="badge badge-green" th:if="${s.role=='ADMIN'}">Admin</span><span class="badge badge-blue" th:if="${s.role=='DOCTOR'}">Doctor</span><span class="badge badge-purple" th:if="${s.role=='EMPLOYEE'}">Employee</span></td>
+      <td th:text="${s.department ?: '-'}">Dept</td>
+      <td th:text="${s.designation ?: '-'}">Desg</td>
+      <td th:text="${s.phone ?: '-'}">Phone</td>
+      <td><span class="badge badge-green" th:if="${s.active}">Active</span><span class="badge badge-red" th:unless="${s.active}">Inactive</span></td>
+      <td class="actions"><a th:href="@{/staff/view/{id}(id=${s.id})}" class="btn btn-outline btn-sm">👁️</a><a th:href="@{/staff/edit/{id}(id=${s.id})}" class="btn btn-primary btn-sm">✏️</a><a th:href="@{/staff/delete/{id}(id=${s.id})}" class="btn btn-danger btn-sm" onclick="return confirm('Delete?')">🗑️</a></td>
+    </tr></tbody></table>
+    <div th:if="${staff.isEmpty()}" class="empty"><div class="empty-icon">👥</div><h3>No staff found</h3></div>
+  </div>
+</main></div></body></html>

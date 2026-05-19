@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Health Tracker — WellOfast Patient Portal</title><link rel="stylesheet" th:href="@{/css/style.css}">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script></head>
+<body>
+<div class="app">
+  <button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+  <div th:replace="~{fragments/patient-sidebar :: sidebar(${user}, 'health-tracker')}"></div>
+  <main class="main fade-in">
+    <div class="topbar">
+      <div><h1>📈 Health Tracker</h1><div class="sub">Log daily vitals and track your health trends</div></div>
+    </div>
+    <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+
+    <!-- Today's Log Form -->
+    <div class="card" style="margin-bottom:1.5rem">
+      <div class="card-header"><h2>📝 Log Today's Vitals</h2>
+        <span th:if="${todayLog != null}" class="badge badge-green">✅ Updated Today</span>
+        <span th:if="${todayLog == null}" class="badge badge-yellow">⏳ Not logged yet</span>
+      </div>
+      <div class="card-body">
+        <form th:action="@{/portal/health-tracker/save}" method="post">
+          <div class="vitals-input-grid">
+            <div class="vital-input-card bp">
+              <div class="vital-input-icon">🫀</div>
+              <label>Blood Pressure</label>
+              <div style="display:flex;gap:.3rem;align-items:center">
+                <input type="number" name="bpSystolic" class="form-control" placeholder="Sys" min="60" max="250"
+                       th:value="${todayLog != null ? todayLog.bpSystolic : ''}">
+                <span>/</span>
+                <input type="number" name="bpDiastolic" class="form-control" placeholder="Dia" min="40" max="150"
+                       th:value="${todayLog != null ? todayLog.bpDiastolic : ''}">
+              </div>
+              <span class="vital-unit">mmHg</span>
+            </div>
+            <div class="vital-input-card hr">
+              <div class="vital-input-icon">💓</div>
+              <label>Heart Rate</label>
+              <input type="number" name="heartRate" class="form-control" placeholder="72" min="30" max="220"
+                     th:value="${todayLog != null ? todayLog.heartRate : ''}">
+              <span class="vital-unit">bpm</span>
+            </div>
+            <div class="vital-input-card sugar">
+              <div class="vital-input-icon">🍬</div>
+              <label>Blood Sugar</label>
+              <input type="number" name="bloodSugar" class="form-control" placeholder="100" step="0.1" min="20" max="600"
+                     th:value="${todayLog != null ? todayLog.bloodSugar : ''}">
+              <select name="sugarType" class="form-control" style="margin-top:.3rem;font-size:.75rem">
+                <option value="FASTING" th:selected="${todayLog != null and todayLog.sugarType == 'FASTING'}">Fasting</option>
+                <option value="POST_MEAL" th:selected="${todayLog != null and todayLog.sugarType == 'POST_MEAL'}">Post Meal</option>
+                <option value="RANDOM" th:selected="${todayLog != null and todayLog.sugarType == 'RANDOM'}">Random</option>
+              </select>
+              <span class="vital-unit">mg/dL</span>
+            </div>
+            <div class="vital-input-card weight">
+              <div class="vital-input-icon">⚖️</div>
+              <label>Weight</label>
+              <input type="number" name="weight" class="form-control" placeholder="70" step="0.1" min="10" max="300"
+                     th:value="${todayLog != null ? todayLog.weight : ''}">
+              <span class="vital-unit">kg</span>
+            </div>
+            <div class="vital-input-card temp">
+              <div class="vital-input-icon">🌡️</div>
+              <label>Temperature</label>
+              <input type="number" name="temperature" class="form-control" placeholder="98.6" step="0.1" min="90" max="110"
+                     th:value="${todayLog != null ? todayLog.temperature : ''}">
+              <span class="vital-unit">°F</span>
+            </div>
+            <div class="vital-input-card spo2">
+              <div class="vital-input-icon">🫁</div>
+              <label>SpO2</label>
+              <input type="number" name="oxygenSaturation" class="form-control" placeholder="98" min="50" max="100"
+                     th:value="${todayLog != null ? todayLog.oxygenSaturation : ''}">
+              <span class="vital-unit">%</span>
+            </div>
+          </div>
+          <div class="form-row" style="margin-top:1rem">
+            <div class="form-group">
+              <label>Mood</label>
+              <select name="mood" class="form-control">
+                <option value="">Select mood...</option>
+                <option value="GREAT" th:selected="${todayLog != null and todayLog.mood == 'GREAT'}">😄 Great</option>
+                <option value="GOOD" th:selected="${todayLog != null and todayLog.mood == 'GOOD'}">🙂 Good</option>
+                <option value="OKAY" th:selected="${todayLog != null and todayLog.mood == 'OKAY'}">😐 Okay</option>
+                <option value="BAD" th:selected="${todayLog != null and todayLog.mood == 'BAD'}">😞 Bad</option>
+                <option value="TERRIBLE" th:selected="${todayLog != null and todayLog.mood == 'TERRIBLE'}">😰 Terrible</option>
+              </select>
+            </div>
+            <div class="form-group" style="flex:2">
+              <label>Notes</label>
+              <input type="text" name="notes" class="form-control" placeholder="Any symptoms, medication changes..."
+                     th:value="${todayLog != null ? todayLog.notes : ''}">
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="margin-top:.5rem">💾 Save Today's Data</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div th:if="${!chartData.isEmpty()}" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1.5rem">
+      <div class="card"><div class="card-header"><h2>🫀 Blood Pressure Trend</h2></div>
+        <div class="card-body"><canvas id="bpChart" height="200"></canvas></div></div>
+      <div class="card"><div class="card-header"><h2>🍬 Blood Sugar Trend</h2></div>
+        <div class="card-body"><canvas id="sugarChart" height="200"></canvas></div></div>
+      <div class="card"><div class="card-header"><h2>⚖️ Weight Trend</h2></div>
+        <div class="card-body"><canvas id="weightChart" height="200"></canvas></div></div>
+      <div class="card"><div class="card-header"><h2>💓 Heart Rate Trend</h2></div>
+        <div class="card-body"><canvas id="hrChart" height="200"></canvas></div></div>
+    </div>
+
+    <!-- History Log -->
+    <div class="card">
+      <div class="card-header"><h2>📊 Recent Logs</h2></div>
+      <div th:if="${logs.isEmpty()}" class="empty">
+        <div class="empty-icon">📈</div><h3>No health data logged yet</h3>
+        <p>Start logging your daily vitals above</p>
+      </div>
+      <table th:if="${!logs.isEmpty()}" class="data-table">
+        <thead><tr><th>Date</th><th>BP</th><th>HR</th><th>Sugar</th><th>Weight</th><th>SpO2</th><th>Mood</th></tr></thead>
+        <tbody>
+          <tr th:each="l : ${logs}">
+            <td th:text="${#temporals.format(l.date, 'dd MMM')}">15 Jun</td>
+            <td><span th:if="${l.bpSystolic != null}" th:text="${l.bpSystolic + '/' + l.bpDiastolic}">120/80</span></td>
+            <td><span th:if="${l.heartRate != null}" th:text="${l.heartRate + ' bpm'}">72</span></td>
+            <td><span th:if="${l.bloodSugar != null}" th:text="${l.bloodSugar + ' mg/dL'}">100</span></td>
+            <td><span th:if="${l.weight != null}" th:text="${l.weight + ' kg'}">70</span></td>
+            <td><span th:if="${l.oxygenSaturation != null}" th:text="${l.oxygenSaturation + '%'}">98%</span></td>
+            <td th:text="${l.mood == 'GREAT' ? '😄' : l.mood == 'GOOD' ? '🙂' : l.mood == 'OKAY' ? '😐' : l.mood == 'BAD' ? '😞' : l.mood == 'TERRIBLE' ? '😰' : '—'}">—</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </main>
+</div>
+<script th:inline="javascript">
+const chartData = /*[[${chartData}]]*/ [];
+if (chartData.length > 0) {
+  const labels = chartData.map(d => d.date ? new Date(d.date).toLocaleDateString('en-IN',{day:'2-digit',month:'short'}) : '');
+  const chartOpts = (label, data, color, canvasId, min, max) => {
+    const ctx = document.getElementById(canvasId);
+    if (!ctx) return;
+    new Chart(ctx, { type: 'line', data: { labels, datasets: [{
+      label, data, borderColor: color, backgroundColor: color+'22', tension: .4, fill: true, pointRadius: 3
+    }]}, options: { responsive: true, scales: { y: { min, max } }, plugins: { legend: { display: false }}}});
+  };
+  chartOpts('Systolic', chartData.map(d=>d.bpSystolic), '#EF4444', 'bpChart', 60, 200);
+  chartOpts('Sugar', chartData.map(d=>d.bloodSugar), '#F59E0B', 'sugarChart', 50, 400);
+  chartOpts('Weight', chartData.map(d=>d.weight), '#8B5CF6', 'weightChart', 30, 150);
+  chartOpts('Heart Rate', chartData.map(d=>d.heartRate), '#EC4899', 'hrChart', 40, 180);
+}
+</script>
+</body></html>

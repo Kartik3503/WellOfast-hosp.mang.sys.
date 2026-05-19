@@ -1,0 +1,19 @@
+<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org" lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>Patients — WellOfast</title><link rel="stylesheet" th:href="@{/css/style.css}"></head><body>
+<div class="app"><button class="mobile-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</button>
+<div th:replace="~{fragments/sidebar :: sidebar(${user}, 'patients')}"></div>
+<main class="main fade-in">
+  <div class="topbar"><div><h1>🏥 Patient Management</h1></div><a th:href="@{/patients/new}" class="btn btn-primary">+ Add Patient</a></div>
+  <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
+  <div class="card">
+    <div class="card-header"><h2>Patient Records</h2>
+      <form th:action="@{/patients}" method="get" class="search-bar"><input type="text" name="search" th:value="${search}" placeholder="Search patients..."><button class="btn btn-primary btn-sm">🔍</button><a th:if="${search}" th:href="@{/patients}" class="btn btn-outline btn-sm">✕</a></form></div>
+    <table class="data-table"><thead><tr><th>Name</th><th>Age</th><th>Gender</th><th>Doctor</th><th>Department</th><th>Status</th><th>Actions</th></tr></thead>
+    <tbody><tr th:each="p : ${patients}">
+      <td class="name" th:text="${p.name}">Name</td><td th:text="${p.age}">0</td><td th:text="${p.gender}">M</td>
+      <td th:text="${p.assignedDoctorName ?: '-'}">Dr</td><td th:text="${p.department ?: '-'}">Dept</td>
+      <td><span class="badge badge-green" th:if="${p.status=='ADMITTED'}">Admitted</span><span class="badge badge-blue" th:if="${p.status=='DISCHARGED'}">Discharged</span><span class="badge badge-gray" th:if="${p.status=='OPD'}">OPD</span></td>
+      <td class="actions"><a th:href="@{/patients/view/{id}(id=${p.id})}" class="btn btn-outline btn-sm">👁️</a><a th:href="@{/patients/edit/{id}(id=${p.id})}" class="btn btn-primary btn-sm">✏️</a><a th:href="@{/patients/delete/{id}(id=${p.id})}" class="btn btn-danger btn-sm" onclick="return confirm('Delete?')">🗑️</a></td>
+    </tr></tbody></table>
+    <div th:if="${patients.isEmpty()}" class="empty"><div class="empty-icon">🏥</div><h3>No patients found</h3><a th:href="@{/patients/new}" class="btn btn-primary">+ Add Patient</a></div>
+  </div>
+</main></div></body></html>

@@ -1,0 +1,21 @@
+# Target directory (compiled Java code and packaged JAR)
+target/
+*.class
+
+# Log files
+*.log
+
+# IDE settings
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# OS temporary files
+.DS_Store
+Thumbs.db
+
+# Help files
+HELP.md
