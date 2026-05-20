@@ -52,6 +52,7 @@ mvn spring-boot:run
 
 ### 3. Access the Application
 Open your browser: **http://localhost:8080**
+And for the live access of the web application access the link:https://wellofast.onrender.com 
 
 ### Demo Account
 A demo hospital account is auto-created on first run:
